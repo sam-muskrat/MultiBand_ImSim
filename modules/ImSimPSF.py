@@ -186,9 +186,9 @@ def PSFmap(PSF, pixel_scale, mag_input, mag_zero=30., N_PSF=100, sep_PSF=120, rn
         x = x[:N_PSF]
         y = y[:N_PSF]
     ## make random shift
-    np.random.seed(rng_seed)
+    rng = np.random.RandomState(rng_seed)
     shift_lim = int(separation/5.)
-    dx_dy = np.random.randint(low=-shift_lim, high=shift_lim, size=N_PSF)
+    dx_dy = rng.randint(low=-shift_lim, high=shift_lim, size=N_PSF)
     x += dx_dy
     y += dx_dy    
 
@@ -269,9 +269,9 @@ def PSFmap_MultiPSF(PSF_list, pixel_scale, mag_input, mag_zero=30., sep_PSF=120,
         x = x[:N_PSF]
         y = y[:N_PSF]
     ## make random shift
-    np.random.seed(rng_seed)
+    rng = np.random.RandomState(rng_seed)
     shift_lim = int(separation/5.)
-    dx_dy = np.random.randint(low=-shift_lim, high=shift_lim, size=N_PSF)
+    dx_dy = rng.randint(low=-shift_lim, high=shift_lim, size=N_PSF)
     x += dx_dy
     y += dx_dy    
 
@@ -349,11 +349,11 @@ def PSFmap_DiffMag(PSF, pixel_scale, mag_inputs, mag_zero=30., sep_type='random'
         # 1degree range
         high_pixel = int(area**0.5*3600./pixel_scale)
         ## for x
-        np.random.seed(rng_seed)
-        x = np.random.randint(low=0, high=high_pixel, size=N_PSF)
+        rng_x = np.random.RandomState(rng_seed)
+        x = rng_x.randint(low=0, high=high_pixel, size=N_PSF)
         ## for y
-        np.random.seed(rng_seed+94)
-        y = np.random.randint(low=0, high=high_pixel, size=N_PSF)
+        rng_y = np.random.RandomState(rng_seed+94)
+        y = rng_y.randint(low=0, high=high_pixel, size=N_PSF)
         # canvas size
         canvas_size = int(high_pixel+10)
     else:
@@ -372,9 +372,9 @@ def PSFmap_DiffMag(PSF, pixel_scale, mag_inputs, mag_zero=30., sep_type='random'
             x = x[:N_PSF]
             y = y[:N_PSF]
         ## make random shift
-        np.random.seed(rng_seed)
+        rng = np.random.RandomState(rng_seed)
         shift_lim = int(separation/5.)
-        dx_dy = np.random.randint(low=-shift_lim, high=shift_lim, size=N_PSF)
+        dx_dy = rng.randint(low=-shift_lim, high=shift_lim, size=N_PSF)
         x += dx_dy
         y += dx_dy
         # canvas size
@@ -457,9 +457,9 @@ def PSFmap_MultiPSF_DiffMag(PSF_list, pixel_scale, mag_list, mag_zero=30., sep_P
         x = x[:N_PSF]
         y = y[:N_PSF]
     ## make random shift
-    np.random.seed(rng_seed)
+    rng = np.random.RandomState(rng_seed)
     shift_lim = int(separation/5.)
-    dx_dy = np.random.randint(low=-shift_lim, high=shift_lim, size=N_PSF)
+    dx_dy = rng.randint(low=-shift_lim, high=shift_lim, size=N_PSF)
     x += dx_dy
     y += dx_dy    
 

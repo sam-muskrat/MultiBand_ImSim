@@ -367,9 +367,9 @@ def MetaDetectShear(outpath_feather,
     logger.info(f'Grid: {Ny} x {Nx} = {Ncells} cells')
     ## Randomly pick objects to save cells 
     if save_Ncells > 0: 
-        np.random.seed(random_seed + save_Ncells) 
-        saved_cell_indices = np.random.choice(Ncells, 
-                                      size=min(save_Ncells, Ncells), 
+        rng_cells = np.random.RandomState(random_seed + save_Ncells)
+        saved_cell_indices = rng_cells.choice(Ncells,
+                                      size=min(save_Ncells, Ncells),
                                       replace=False)
         cells_dir = os.path.join(os.path.dirname(outpath_feather), 
                                  'cells_metadetect') 

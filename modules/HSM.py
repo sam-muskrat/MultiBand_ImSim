@@ -169,10 +169,10 @@ def AdaptiveMomShape(outpath_feather,
     # >>>>>>>>>>>>> 2. run FindAdaptiveMom for each object
     ## randomly pick objects to save postage stamps 
     if save_Nstamps > 0: 
-        np.random.seed(random_seed + save_Nstamps) 
-        saved_indices = np.random.choice(detec_cata.index, 
-                                         size=save_Nstamps, 
-                                         replace=False) 
+        rng_stamps = np.random.RandomState(random_seed + save_Nstamps)
+        saved_indices = rng_stamps.choice(detec_cata.index,
+                                          size=save_Nstamps,
+                                          replace=False) 
         stamp_dir = os.path.join(os.path.dirname(outpath_feather), 
                                  'stamps_AMS') 
         os.makedirs(stamp_dir, exist_ok=True) 
@@ -419,10 +419,10 @@ def EstimateShear_samePSF(outpath_feather,
     # >>>>>>>>>>>>> 2. run EstimateShear for each object
     ## randomly pick objects to save postage stamps 
     if save_Nstamps > 0: 
-        np.random.seed(random_seed + save_Nstamps) 
-        saved_indices = np.random.choice(detec_cata.index, 
-                                         size=save_Nstamps, 
-                                         replace=False) 
+        rng_stamps = np.random.RandomState(random_seed + save_Nstamps)
+        saved_indices = rng_stamps.choice(detec_cata.index,
+                                          size=save_Nstamps,
+                                          replace=False) 
         stamp_dir = os.path.join(os.path.dirname(outpath_feather), 
                                  'stamps_AMS') 
         os.makedirs(stamp_dir, exist_ok=True) 

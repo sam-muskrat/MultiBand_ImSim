@@ -284,10 +284,10 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
                     Ngal = Ngal0
 
                 ### random sample positions
-                np.random.seed(int(rng_seed_tile * 11))
-                RA_random = np.random.uniform(low=ra_min, high=ra_max, size=Ngal)
-                np.random.seed(int(rng_seed_tile * 62))
-                DEC_random = np.random.uniform(low=dec_min, high=dec_max, size=Ngal)
+                rng_ra = np.random.RandomState(int(rng_seed_tile * 11))
+                RA_random = rng_ra.uniform(low=ra_min, high=ra_max, size=Ngal)
+                rng_dec = np.random.RandomState(int(rng_seed_tile * 62))
+                DEC_random = rng_dec.uniform(low=dec_min, high=dec_max, size=Ngal)
                 ###### assign
                 gals_info_selec[0].loc[:, 'RA'] = RA_random[:Ngal0]
                 gals_info_selec[0].loc[:, 'DEC'] = DEC_random[:Ngal0]
@@ -348,10 +348,10 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
                     del mask_star
 
                     ## randomly place stars
-                    np.random.seed(int(rng_seed_tile * 90))
-                    stars_info_selec.loc[:, 'RA'] = np.random.uniform(low=ra_min, high=ra_max, size=Nstar_even)
-                    np.random.seed(int(rng_seed_tile * 63))
-                    stars_info_selec.loc[:, 'DEC'] = np.random.uniform(low=dec_min, high=dec_max, size=Nstar_even)
+                    rng_star_ra = np.random.RandomState(int(rng_seed_tile * 90))
+                    stars_info_selec.loc[:, 'RA'] = rng_star_ra.uniform(low=ra_min, high=ra_max, size=Nstar_even)
+                    rng_star_dec = np.random.RandomState(int(rng_seed_tile * 63))
+                    stars_info_selec.loc[:, 'DEC'] = rng_star_dec.uniform(low=dec_min, high=dec_max, size=Nstar_even)
 
                 elif star_position_type == 'true':
                     # use true star location
@@ -532,10 +532,10 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
                     Ngal = Ngal0
 
                 ### random sample positions
-                np.random.seed(int(rng_seed_tile * 11))
-                RA_random = np.random.uniform(low=ra_min, high=ra_max, size=Ngal)
-                np.random.seed(int(rng_seed_tile * 62))
-                DEC_random = np.random.uniform(low=dec_min, high=dec_max, size=Ngal)
+                rng_ra = np.random.RandomState(int(rng_seed_tile * 11))
+                RA_random = rng_ra.uniform(low=ra_min, high=ra_max, size=Ngal)
+                rng_dec = np.random.RandomState(int(rng_seed_tile * 62))
+                DEC_random = rng_dec.uniform(low=dec_min, high=dec_max, size=Ngal)
                 ###### assign
                 gals_info_selec[0].loc[:, 'RA'] = RA_random[:Ngal0]
                 gals_info_selec[0].loc[:, 'DEC'] = DEC_random[:Ngal0]
@@ -597,10 +597,10 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
                     del mask_star
 
                     ## randomly place stars
-                    np.random.seed(int(rng_seed_tile * 90))
-                    stars_info_selec.loc[:, 'RA'] = np.random.uniform(low=ra_min, high=ra_max, size=Nstar_even)
-                    np.random.seed(int(rng_seed_tile * 63))
-                    stars_info_selec.loc[:, 'DEC'] = np.random.uniform(low=dec_min, high=dec_max, size=Nstar_even)
+                    rng_star_ra = np.random.RandomState(int(rng_seed_tile * 90))
+                    stars_info_selec.loc[:, 'RA'] = rng_star_ra.uniform(low=ra_min, high=ra_max, size=Nstar_even)
+                    rng_star_dec = np.random.RandomState(int(rng_seed_tile * 63))
+                    stars_info_selec.loc[:, 'DEC'] = rng_star_dec.uniform(low=dec_min, high=dec_max, size=Nstar_even)
 
                 elif star_position_type == 'true':
                     # use true star location
