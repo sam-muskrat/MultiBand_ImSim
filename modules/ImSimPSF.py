@@ -38,9 +38,9 @@ def MoffatPSF(seeing, moffat_beta, psf_e=None):
         psf_e1 = psf_e[0]
         psf_e2 = psf_e[1]
 
-        psf_e = np.sqrt(psf_e1**2+psf_e2**2)
+        psf_e_mag = np.sqrt(psf_e1**2+psf_e2**2)
         # g_i = e_i/(2-e)
-        psf_g1, psf_g2 = psf_e1/(2-psf_e), psf_e2/(2-psf_e)
+        psf_g1, psf_g2 = psf_e1/(2-psf_e_mag), psf_e2/(2-psf_e_mag)
 
         psf = psf.shear(g1=psf_g1, g2=psf_g2)
 
@@ -72,9 +72,9 @@ def AiryPSF(lam, diam, obscuration, psf_e=None):
         psf_e1 = psf_e[0]
         psf_e2 = psf_e[1]
 
-        psf_e = np.sqrt(psf_e1**2+psf_e2**2)
+        psf_e_mag = np.sqrt(psf_e1**2+psf_e2**2)
         # g_i = e_i/(2-e)
-        psf_g1, psf_g2 = psf_e1/(2-psf_e), psf_e2/(2-psf_e)
+        psf_g1, psf_g2 = psf_e1/(2-psf_e_mag), psf_e2/(2-psf_e_mag)
 
         psf = psf.shear(g1=psf_g1, g2=psf_g2)
 
