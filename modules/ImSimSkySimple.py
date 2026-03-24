@@ -46,35 +46,7 @@ def _PSFNoisySkyImages_simple(para_list):
     logger.info(f'Simulating simple image for tile {tile_label} band {band} rot {gal_rotation_angle}...')
 
     # PSF profiles
-    if psf_info[0].lower() == 'moffat':
-
-        seeing, beta, psf_e = psf_info[1:]
-        # if psf e is zero, replace with None
-        if (psf_e[0] == 0.) and (psf_e[1] == 0.):
-            psf_e = None
-
-        psf_paras = (seeing, beta, psf_e)
-        psf_func = PSFModule.MoffatPSF
-        psf_pixel = False
-
-    elif psf_info[0].lower() == 'airy':
-
-        lam, diam, obscuration, psf_e = psf_info[1:]
-        # if psf e is zero, replace with None
-        if (psf_e[0] == 0.) and (psf_e[1] == 0.):
-            psf_e = None
-
-        psf_paras = (lam, diam, obscuration, psf_e)
-        psf_func = PSFModule.AiryPSF
-        psf_pixel = False
-
-    elif psf_info[0].lower() == 'pixelima':
-
-        psf_fits_file = psf_info[1]
-
-        psf_paras = (psf_fits_file, pixel_scale, (0.5, 0.5))
-        psf_func = PSFModule.loadPixelPSF
-        psf_pixel = True
+    psf_func, psf_paras, psf_pixel = PSFModule.parse_psf_info(psf_info, pixel_scale)
 
     # warning
     if save_image_chips:

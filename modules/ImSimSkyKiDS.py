@@ -55,35 +55,7 @@ def _PSFNoisySkyImages_KiDS_sameExpo(para_list):
     logger.info(f'Simulating KiDS_sameExpo image for tile {tile_label} band {band} rot {gal_rotation_angle}...')
 
     # PSF profiles
-    if psf_info[0].lower() == 'moffat':
-
-        seeing, beta, psf_e = psf_info[1:]
-        # if psf e is zero, replace with None
-        if (psf_e[0] == 0.) and (psf_e[1] == 0.):
-            psf_e = None
-
-        psf_paras = (seeing, beta, psf_e)
-        psf_func = PSFModule.MoffatPSF
-        psf_pixel = False
-
-    elif psf_info[0].lower() == 'airy':
-
-        lam, diam, obscuration, psf_e = psf_info[1:]
-        # if psf e is zero, replace with None
-        if (psf_e[0] == 0.) and (psf_e[1] == 0.):
-            psf_e = None
-
-        psf_paras = (lam, diam, obscuration, psf_e)
-        psf_func = PSFModule.AiryPSF
-        psf_pixel = False
-
-    elif psf_info[0].lower() == 'pixelima':
-
-        psf_fits_file = psf_info[1]
-
-        psf_paras = (psf_fits_file, pixel_scale, (0.5, 0.5))
-        psf_func = PSFModule.loadPixelPSF
-        psf_pixel = True
+    psf_func, psf_paras, psf_pixel = PSFModule.parse_psf_info(psf_info, pixel_scale)
 
     # number of exposures
     if band == 'u':
@@ -326,35 +298,7 @@ def _PSFNoisySkyImages_KiDS_singleExpo(para_list):
     logger.info(f'Simulating KiDS exposure for tile {tile_label} band {band} expo {id_exposure} rot {gal_rotation_angle}...')
 
     # PSF profiles
-    if psf_info[0].lower() == 'moffat':
-
-        seeing, beta, psf_e = psf_info[1:]
-        # if psf e is zero, replace with None
-        if (psf_e[0] == 0.) and (psf_e[1] == 0.):
-            psf_e = None
-
-        psf_paras = (seeing, beta, psf_e)
-        psf_func = PSFModule.MoffatPSF
-        psf_pixel = False
-
-    elif psf_info[0].lower() == 'airy':
-
-        lam, diam, obscuration, psf_e = psf_info[1:]
-        # if psf e is zero, replace with None
-        if (psf_e[0] == 0.) and (psf_e[1] == 0.):
-            psf_e = None
-
-        psf_paras = (lam, diam, obscuration, psf_e)
-        psf_func = PSFModule.AiryPSF
-        psf_pixel = False
-
-    elif psf_info[0].lower() == 'pixelima':
-
-        psf_fits_file = psf_info[1]
-
-        psf_paras = (psf_fits_file, pixel_scale, (0.5, 0.5))
-        psf_func = PSFModule.loadPixelPSF
-        psf_pixel = True
+    psf_func, psf_paras, psf_pixel = PSFModule.parse_psf_info(psf_info, pixel_scale)
 
     # outpath
     outpath_image_name_list = [os.path.join(outpath_dir, f'chips_tile{tile_label}_band{band}_rot{gal_rotation_angle:.0f}', f'exp{id_exposure}chip_{i_chip+1}OFCS.fits')
@@ -533,61 +477,8 @@ def _PSFNoisySkyImages_KiDS_varChips(para_list):
     logger.info(f'Simulating KiDS exposure with varChips for tile {tile_label} band {band} expo {id_exposure} rot {gal_rotation_angle}...')
 
     # PSF profiles
-    if psf_info_chips[0].lower() == 'moffat':
-
-        # function
-        psf_func = PSFModule.MoffatPSF
-        psf_pixel = False
-
-        # paras
-        seeing_chips, beta_chips, psf_e_chips = psf_info_chips[1:]
-        psf_paras_chips = []
-        for i_chip in range(32):
-            seeing = seeing_chips[i_chip]
-            beta = beta_chips[i_chip]
-            psf_e = [psf_e_chips[0][i_chip], psf_e_chips[1][i_chip]]
-            # if psf e is zero, replace with None
-            if (psf_e[0] == 0.) and (psf_e[1] == 0.):
-                psf_e = None
-
-            psf_paras_chips.append((seeing, beta, psf_e))
-            del seeing, beta, psf_e
-        del seeing_chips, beta_chips, psf_e_chips, psf_info_chips
-
-    elif psf_info_chips[0].lower() == 'airy':
-
-        # function
-        psf_func = PSFModule.AiryPSF
-        psf_pixel = False
-
-        # paras
-        lam_chips, diam_chips, obscuration_chips, psf_e_chips = psf_info_chips[1:]
-        psf_paras_chips = []
-        for i_chip in range(32):
-            lam = lam_chips[i_chip]
-            diam = diam_chips[i_chip]
-            obscuration = obscuration_chips[i_chip]
-            psf_e = [psf_e_chips[0][i_chip], psf_e_chips[1][i_chip]]
-            # if psf e is zero, replace with None
-            if (psf_e[0] == 0.) and (psf_e[1] == 0.):
-                psf_e = None
-
-            psf_paras_chips.append((lam, diam, obscuration, psf_e))
-            del lam, diam, obscuration, psf_e
-        del lam_chips, diam_chips, obscuration_chips, psf_e_chips, psf_info_chips
-
-    elif psf_info_chips[0].lower() == 'pixelima':
-
-        # function
-        psf_func = PSFModule.loadPixelPSF
-        psf_pixel = True
-
-        # paras
-        psf_fits_file_chips = psf_info_chips[1]
-        psf_paras_chips = []
-        for i_chip in range(32):
-            psf_paras_chips.append((psf_fits_file_chips[i_chip], pixel_scale, (0.5, 0.5)))
-        del psf_fits_file_chips, psf_info_chips
+    psf_func, psf_paras_chips, psf_pixel = PSFModule.parse_psf_info_chips(psf_info_chips, pixel_scale)
+    del psf_info_chips
 
     # outpath
     outpath_image_name_list = [os.path.join(outpath_dir, f'chips_tile{tile_label}_band{band}_rot{gal_rotation_angle:.0f}', f'exp{id_exposure}chip_{i_chip+1}OFCS.fits')
