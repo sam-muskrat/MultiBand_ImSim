@@ -325,7 +325,7 @@ def GalaxiesImage_casual(canvas, band, pixel_scale, PSF,
     mask_tmp = (x_gals>=bounds.xmin) & (x_gals<=bounds.xmax) & (y_gals>=bounds.ymin) & (y_gals<=bounds.ymax)
     gals_info_selec = gals_info_casual[mask_tmp].copy()
     gals_info_selec.reset_index(drop=True, inplace=True)
-    logger.debug(f'Number of galaxies within the bounds: {len(x_gals)}')
+    logger.debug(f'Number of galaxies within the bounds: {len(gals_info_selec)}')
     del x_gals, y_gals, mask_tmp, bounds, gals_info_casual
 
     ## positions to int
