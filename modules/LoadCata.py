@@ -79,12 +79,12 @@ def GalInfo(cata_pathfile, primary_band, bands,
         logger.info(f"size cut in: {size_cut}")
 
     # load file
-    file_type = cata_pathfile[-3:]
-    if file_type == 'csv':
+    file_type = os.path.splitext(cata_pathfile)[1].lower()
+    if file_type == '.csv':
         cata = pd.read_csv(cata_pathfile)
-    elif file_type == 'her':
+    elif file_type == '.feather':
         cata = pd.read_feather(cata_pathfile)
-    elif file_type == 'its':
+    elif file_type == '.fits':
         with fits.open(cata_pathfile) as hdul:
             cata = hdul[1].data
     else:
@@ -338,12 +338,12 @@ def StarInfo(cata_pathfile, primary_band, bands,
         logger.info(f"Magnitude cut in: {mag_cut}")
 
     # load file
-    file_type = cata_pathfile[-3:]
-    if file_type == 'csv':
+    file_type = os.path.splitext(cata_pathfile)[1].lower()
+    if file_type == '.csv':
         cata = pd.read_csv(cata_pathfile)
-    elif file_type == 'her':
+    elif file_type == '.feather':
         cata = pd.read_feather(cata_pathfile)
-    elif file_type == 'its':
+    elif file_type == '.fits':
         with fits.open(cata_pathfile) as hdul:
             cata = hdul[1].data
     else:
@@ -461,12 +461,12 @@ def NoiseInfo(cata_pathfile, bands,
         psf_type_list *= len(bands)
 
     # load file
-    file_type = cata_pathfile[-3:]
-    if file_type == 'csv':
+    file_type = os.path.splitext(cata_pathfile)[1].lower()
+    if file_type == '.csv':
         cata = pd.read_csv(cata_pathfile)
-    elif file_type == 'her':
+    elif file_type == '.feather':
         cata = pd.read_feather(cata_pathfile)
-    elif file_type == 'its':
+    elif file_type == '.fits':
         with fits.open(cata_pathfile) as hdul:
             cata = Table(hdul[1].data).to_pandas()
     else:
@@ -474,12 +474,12 @@ def NoiseInfo(cata_pathfile, bands,
     logger.info(f'noise cata: {cata_pathfile}')
     ## for varChips
     if file4varChips:
-        file_type = file4varChips[-3:]
-        if file_type == 'csv':
+        file_type = os.path.splitext(file4varChips)[1].lower()
+        if file_type == '.csv':
             cata_varChips = pd.read_csv(file4varChips)
-        elif file_type == 'her':
+        elif file_type == '.feather':
             cata_varChips = pd.read_feather(file4varChips)
-        elif file_type == 'its':
+        elif file_type == '.fits':
             with fits.open(file4varChips) as hdul:
                 cata_varChips = Table(hdul[1].data).to_pandas()
         else:
