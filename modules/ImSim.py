@@ -30,13 +30,13 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
                                             Nmax_proc,
                                             N_tiles, bands, pixel_scale_list, image_type_list,
                                             noise_info,
-                                            gals_info, gal_rotation_angles=[0.], g_cosmic=[0, 0], gal_position_type=['true', 18],
+                                            gals_info, gal_rotation_angles=None, g_cosmic=None, gal_position_type=None,
                                             stars_area=None, stars_info=None, star_position_type='random',
-                                            PSF_map=[], N_PSF=100, sep_PSF=120,
-                                            image_chips=None, 
-                                            image_PSF=None, 
+                                            PSF_map=None, N_PSF=100, sep_PSF=120,
+                                            image_chips=None,
+                                            image_PSF=None,
                                             image_noise=None,
-                                            psf_type_list=['moffat'],
+                                            psf_type_list=None,
                                             CalSimpleArea=True,
                                             SimpleCut=True, SimpleCam=True,
                                             needed_tile=None):
@@ -45,6 +45,17 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
         Support extending input catalogues
         Simulate tiles with 1sqdeg
     '''
+
+    if gal_rotation_angles is None:
+        gal_rotation_angles = [0.]
+    if g_cosmic is None:
+        g_cosmic = [0, 0]
+    if gal_position_type is None:
+        gal_position_type = ['true', 18]
+    if PSF_map is None:
+        PSF_map = []
+    if psf_type_list is None:
+        psf_type_list = ['moffat']
 
     # due to compatibility
     if len(psf_type_list) != len(bands):

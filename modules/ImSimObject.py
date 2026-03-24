@@ -64,8 +64,8 @@ def SimpleCanvas(RA_min, RA_max, DEC_min, DEC_max, pixel_scale, edge_sep=18.):
     return canvas
 
 def GalaxiesImage(canvas, band, pixel_scale, PSF,
-                    gals_info, gal_rotation_angle=0., g_cosmic=[0, 0], gal_position_type=['true', 18.],
-                    g_const=True, 
+                    gals_info, gal_rotation_angle=0., g_cosmic=None, gal_position_type=None,
+                    g_const=True,
                     pixelPSF=False):
     """
     Generate pure sky image with only galaxies
@@ -98,6 +98,11 @@ def GalaxiesImage(canvas, band, pixel_scale, PSF,
     full_image: galsim Images
         Image for galaxies.
     """
+
+    if g_cosmic is None:
+        g_cosmic = [0, 0]
+    if gal_position_type is None:
+        gal_position_type = ['true', 18.]
 
     # check if the canvas is clean
     if np.any(canvas.array):
@@ -243,8 +248,8 @@ def GalaxiesImage(canvas, band, pixel_scale, PSF,
     return full_image
 
 def GalaxiesImage_casual(canvas, band, pixel_scale, PSF,
-                    gals_info_casual, gal_rotation_angle=0., g_cosmic=[0, 0], gal_position_type=['true', 18.],
-                    g_const=True, 
+                    gals_info_casual, gal_rotation_angle=0., g_cosmic=None, gal_position_type=None,
+                    g_const=True,
                     pixelPSF=False):
     """
     Generate galaxies with casual mode
@@ -278,6 +283,11 @@ def GalaxiesImage_casual(canvas, band, pixel_scale, PSF,
     full_image: galsim Images
         Image for galaxies.
     """
+
+    if g_cosmic is None:
+        g_cosmic = [0, 0]
+    if gal_position_type is None:
+        gal_position_type = ['true', 18.]
 
     # we will add something, so do a copy
     gals_info_casual = gals_info_casual.copy()
