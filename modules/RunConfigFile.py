@@ -12,7 +12,17 @@ import shutil
 import logging
 import pathlib
 import configparser
-import distutils.util
+def _strtobool(val):
+    """Convert a string representation of truth to True or False.
+    Replacement for deprecated _strtobool.
+    """
+    val = str(val).strip().lower()
+    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+        return True
+    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+        return False
+    else:
+        raise ValueError(f"invalid truth value {val!r}")
 
 logger = logging.getLogger(__name__)
 
@@ -96,13 +106,13 @@ def ParseConfig(config_file, taskIDs, run_tag, running_log):
     imsim_configs = {'survey': config_imsim.get('survey'),
                     'N_tiles': config_imsim.getint('N_tiles'),
                     'gal_rotation_angles': [float(i_r.strip()) for i_r in config_imsim.get('gal_rotation_angles').split(',')],
-                    'PSF_map': [bool(distutils.util.strtobool(x.strip())) for x in config_imsim.get('PSF_map').split(',')],
+                    'PSF_map': [bool(_strtobool(x.strip())) for x in config_imsim.get('PSF_map').split(',')],
                     'mag_zero': config_imsim.getfloat('mag_zero'),
                     'bands': [x.strip() for x in config_imsim.get('band_list').split(',')],
                     'pixel_scale_list': [float(i_p.strip()) for i_p in config_imsim.get('pixel_scale_list').split(',')],
                     'image_type_list': [x.strip() for x in config_imsim.get('image_type_list').split(',')],
-                    'image_chips': [bool(distutils.util.strtobool(x.strip())) for x in config_imsim.get('image_chips').split(',')],
-                    'image_PSF': [bool(distutils.util.strtobool(x.strip())) for x in config_imsim.get('image_PSF').split(',')]}
+                    'image_chips': [bool(_strtobool(x.strip())) for x in config_imsim.get('image_chips').split(',')],
+                    'image_PSF': [bool(_strtobool(x.strip())) for x in config_imsim.get('image_PSF').split(',')]}
 
     ### repeat certain para to match with number of bands
     if len(imsim_configs['PSF_map']) == 1:
@@ -121,7 +131,7 @@ def ParseConfig(config_file, taskIDs, run_tag, running_log):
     if image_noise:
         imsim_configs['image_noise'] = [
                                         bool(
-                                            distutils.util.strtobool(x.strip())
+                                            _strtobool(x.strip())
                                             ) 
                                             for x in image_noise.split(',')
                                         ]
@@ -321,7 +331,7 @@ def ParseConfig(config_file, taskIDs, run_tag, running_log):
                          'config_files': [os.path.join(config_dir, x.strip()) for x in config_swarp.get('config_files').split(',')],
                          'bands_group': re.findall(r'\[([^]]+)', config_swarp.get('bands_group')),
                          'image_label_list': [x.strip() for x in config_swarp.get('image_label_list').split(',')],
-                         'only_resamples': [bool(distutils.util.strtobool(x.strip())) for x in config_swarp.get('only_resamples').split(',')],
+                         'only_resamples': [bool(_strtobool(x.strip())) for x in config_swarp.get('only_resamples').split(',')],
                          'clean_up_levels': [int(x.strip()) for x in config_swarp.get('clean_up_levels').split(',')]}
 
         ### the images for swarpping
