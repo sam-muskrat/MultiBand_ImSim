@@ -304,8 +304,8 @@ def PSFmap_MultiPSF(PSF_list, pixel_scale, mag_input, mag_zero=30., sep_PSF=120,
 
     return psf_image
 
-def PSFmap_DiffMag(PSF, pixel_scale, mag_inputs, mag_zero=30., sep_type='random', rng_seed=940120, area=1., pixelPSF=False):
-    """ 
+def PSFmap_DiffMag(PSF, pixel_scale, mag_inputs, mag_zero=30., sep_type='random', rng_seed=940120, area=1., sep_PSF=120, pixelPSF=False):
+    """
     Generate PSF stars from a single PSF model,
         with variable magnitudes.
 
@@ -320,11 +320,13 @@ def PSFmap_DiffMag(PSF, pixel_scale, mag_inputs, mag_zero=30., sep_type='random'
     mag_zero : float, optional (default: 30.)
         The zero point for magnitude.
     sep_type : str, optional (default: 'random')
-        Seperation type between PSFs.        
-    rng_seed : int, optional (default: 940120) 
+        Seperation type between PSFs.
+    rng_seed : int, optional (default: 940120)
         Seed for random number generator.
     area (deg^2) : float, optional (default: 1)
         Total area for simulated image (used when sep_type='random')
+    sep_PSF (pixel) : int, optional (default: 120)
+        Seperation between PSFs (used when sep_type='grid').
     pixelPSF : bool, optional (default: False)
         if the PSF provided already including pixel response
 
@@ -335,7 +337,7 @@ def PSFmap_DiffMag(PSF, pixel_scale, mag_inputs, mag_zero=30., sep_type='random'
     """
 
     mag_inputs = np.array(mag_inputs)
-    
+
     # number of stars
     N_PSF = len(mag_inputs)
 
@@ -346,15 +348,40 @@ def PSFmap_DiffMag(PSF, pixel_scale, mag_inputs, mag_zero=30., sep_type='random'
     if sep_type == 'random':
         # 1degree range
         high_pixel = int(area**0.5*3600./pixel_scale)
-        ## for x 
+        ## for x
         np.random.seed(rng_seed)
         x = np.random.randint(low=0, high=high_pixel, size=N_PSF)
         ## for y
         np.random.seed(rng_seed+94)
         y = np.random.randint(low=0, high=high_pixel, size=N_PSF)
+        # canvas size
+        canvas_size = int(high_pixel+10)
+    else:
+        # grid layout
+        separation = int(sep_PSF)
+        Nrow = int(N_PSF**0.5)
+        x = np.arange(separation, separation+Nrow*separation, separation, dtype='int')
+        y = np.repeat(x, Nrow)
+        x = np.tile(x, Nrow)
+        ## check outliers
+        Nrow = N_PSF - len(x)
+        if Nrow > 0:
+            x = np.concatenate([x, np.arange(separation, separation+Nrow*separation, separation)])
+            y = np.concatenate([y, np.full(Nrow, y[-1]+separation)])
+        elif Nrow < 0:
+            x = x[:N_PSF]
+            y = y[:N_PSF]
+        ## make random shift
+        np.random.seed(rng_seed)
+        shift_lim = int(separation/5.)
+        dx_dy = np.random.randint(low=-shift_lim, high=shift_lim, size=N_PSF)
+        x += dx_dy
+        y += dx_dy
+        # canvas size
+        canvas_size = int(max(np.amax(x), np.amax(y)) + separation)
 
     # initiate a canvas
-    psf_image = galsim.ImageF(int(high_pixel+10), int(high_pixel+10), scale=pixel_scale)
+    psf_image = galsim.ImageF(canvas_size, canvas_size, scale=pixel_scale)
 
     # place PSF
     for i in range(N_PSF):
