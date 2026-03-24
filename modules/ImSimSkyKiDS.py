@@ -418,19 +418,20 @@ def _PSFNoisySkyImages_KiDS_singleExpo(para_list):
     # +++ PSF
     PSF = psf_func(*psf_paras)
 
-    # +++ background noise
-    noise = NoiseModule.GaussianNoise(rms, rng_seed=int(rng_seed_band+120*gal_rotation_angle+94*id_exposure))
+    # +++ background noise base seed
+    noise_base_seed = int(rng_seed_band+120*gal_rotation_angle+94*id_exposure)
 
     # +++ PSF map
     if (not outpath_PSF_exist):
         mag_PSF_2 = 18. # for noise_flux = 2
         mag_PSF = mag_PSF_2 - 2.5*np.log10(rms/2.)
-        image_PSF = PSFModule.PSFmap(PSF, pixel_scale, mag_PSF, 
+        image_PSF = PSFModule.PSFmap(PSF, pixel_scale, mag_PSF,
             N_PSF=N_PSF, sep_PSF=sep_PSF, rng_seed=rng_seed_band,
             pixelPSF=psf_pixel)
 
         ## noise background
-        image_PSF.addNoise(noise)
+        noise_psf = NoiseModule.GaussianNoise(rms, rng_seed=noise_base_seed)
+        image_PSF.addNoise(noise_psf)
 
         ## save
         image_PSF.write(outpath_PSF_name)
@@ -488,7 +489,9 @@ def _PSFNoisySkyImages_KiDS_singleExpo(para_list):
                     del image_stars
 
                 ## add noise background
-                image_galaxies.addNoise(noise)
+                ## use a per-chip seed for reproducibility when resuming
+                noise_chip = NoiseModule.GaussianNoise(rms, rng_seed=int(noise_base_seed + i_chip*7))
+                image_galaxies.addNoise(noise_chip)
 
                 ## save the noisy image
                 image_galaxies.write(outpath_image_name)
@@ -643,9 +646,9 @@ def _PSFNoisySkyImages_KiDS_varChips(para_list):
         logger.info("All desired images exist, end the process.")
         return 1
 
-    # +++ background noise 
-    ## same for all chips
-    noise = NoiseModule.GaussianNoise(rms, rng_seed=int(rng_seed_band+120*gal_rotation_angle+94*id_exposure))
+    # +++ background noise base seed
+    ## per-chip noise objects are created in the loop for reproducibility when resuming
+    noise_base_seed = int(rng_seed_band+120*gal_rotation_angle+94*id_exposure)
 
     # +++ sky image
     if (False in outpath_image_exist_list):
@@ -698,7 +701,9 @@ def _PSFNoisySkyImages_KiDS_varChips(para_list):
                     del image_stars
 
                 ## add noise background
-                image_galaxies.addNoise(noise)
+                ## use a per-chip seed for reproducibility when resuming
+                noise_chip = NoiseModule.GaussianNoise(rms, rng_seed=int(noise_base_seed + i_chip*7))
+                image_galaxies.addNoise(noise_chip)
 
                 ## save the noisy image
                 image_galaxies.write(outpath_image_name)
