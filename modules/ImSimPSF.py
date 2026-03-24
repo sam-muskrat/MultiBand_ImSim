@@ -39,6 +39,8 @@ def MoffatPSF(seeing, moffat_beta, psf_e=None):
         psf_e2 = psf_e[1]
 
         psf_e_mag = np.sqrt(psf_e1**2+psf_e2**2)
+        if psf_e_mag >= 2:
+            raise ValueError(f'Unphysical PSF ellipticity |e| = {psf_e_mag} >= 2')
         # g_i = e_i/(2-e)
         psf_g1, psf_g2 = psf_e1/(2-psf_e_mag), psf_e2/(2-psf_e_mag)
 
@@ -73,6 +75,8 @@ def AiryPSF(lam, diam, obscuration, psf_e=None):
         psf_e2 = psf_e[1]
 
         psf_e_mag = np.sqrt(psf_e1**2+psf_e2**2)
+        if psf_e_mag >= 2:
+            raise ValueError(f'Unphysical PSF ellipticity |e| = {psf_e_mag} >= 2')
         # g_i = e_i/(2-e)
         psf_g1, psf_g2 = psf_e1/(2-psf_e_mag), psf_e2/(2-psf_e_mag)
 
