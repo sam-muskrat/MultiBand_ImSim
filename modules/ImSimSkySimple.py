@@ -30,18 +30,28 @@ def _PSFNoisySkyImages_simple(para_list):
         Adjoint to RunParallel_PSFNoisySkyImages in ImSim.py
     '''
 
-    (tile_label, band, pixel_scale, rng_seed_band, outpath_image_basename,
-        rms, psf_info,
-        g_cosmic,
-        gals_info_band, gal_rotation_angle,
-        stars_info_band,
-        outpath_PSF_basename, N_PSF, sep_PSF,
-        save_image_chips, save_image_PSF, image_PSF_size, 
-        save_image_noise,
-        outpath_dir,
-        gal_position_type,
-        g_const,
-        SimpleCam) = para_list
+    tile_label = para_list['tile_label']
+    band = para_list['band']
+    pixel_scale = para_list['pixel_scale']
+    rng_seed_band = para_list['rng_seed_band']
+    outpath_image_basename = para_list['outpath_image_basename']
+    rms = para_list['rms']
+    psf_info = para_list['psf_info']
+    g_cosmic = para_list['g_cosmic']
+    gals_info_band = para_list['gals_info_band']
+    gal_rotation_angle = para_list['gal_rotation_angle']
+    stars_info_band = para_list['stars_info_band']
+    outpath_PSF_basename = para_list['outpath_PSF_basename']
+    N_PSF = para_list['N_PSF']
+    sep_PSF = para_list['sep_PSF']
+    save_image_chips = para_list['save_image_chips']
+    save_image_PSF = para_list['save_image_PSF']
+    image_PSF_size = para_list['image_PSF_size']
+    save_image_noise = para_list['save_image_noise']
+    outpath_dir = para_list['outpath_dir']
+    gal_position_type = para_list['gal_position_type']
+    g_const = para_list['g_const']
+    SimpleCam = para_list['SimpleCam']
 
     logger.info(f'Simulating simple image for tile {tile_label} band {band} rot {gal_rotation_angle}...')
 

@@ -809,19 +809,20 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
                         # collected parameters
                         ## rotations simulated separately
                         for gal_rotation_angle in gal_rotation_angles:
-                            para_list = (tile_label, band, pixel_scale, rng_seed_band,
-                                        rms, psf_info_chips,
-                                        g_cosmic,
-                                        gals_info_band, gal_rotation_angle,
-                                        stars_info_band,
-                                        outpath_PSF_basename, N_PSF, sep_PSF,
-                                        save_image_PSF, image_PSF_size, 
-                                        save_image_noise,
-                                        outpath_dir,
-                                        i_expo,
-                                        gal_position_type,
-                                        g_const,
-                                        SimpleCam)
+                            para_list = dict(
+                                        tile_label=tile_label, band=band, pixel_scale=pixel_scale, rng_seed_band=rng_seed_band,
+                                        rms=rms, psf_info_chips=psf_info_chips,
+                                        g_cosmic=g_cosmic,
+                                        gals_info_band=gals_info_band, gal_rotation_angle=gal_rotation_angle,
+                                        stars_info_band=stars_info_band,
+                                        outpath_PSF_basename=outpath_PSF_basename, N_PSF=N_PSF, sep_PSF=sep_PSF,
+                                        save_image_PSF=save_image_PSF, image_PSF_size=image_PSF_size,
+                                        save_image_noise=save_image_noise,
+                                        outpath_dir=outpath_dir,
+                                        id_exposure=i_expo,
+                                        gal_position_type=gal_position_type,
+                                        g_const=g_const,
+                                        SimpleCam=SimpleCam)
                             para_lists.append(para_list)
                             # label
                             image_type_labels.append(image_type)
@@ -876,19 +877,20 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
                         # collected parameters
                         ## rotations simulated separately
                         for gal_rotation_angle in gal_rotation_angles:
-                            para_list = (tile_label, band, pixel_scale, rng_seed_band,
-                                        rms, psf_info,
-                                        g_cosmic,
-                                        gals_info_band, gal_rotation_angle,
-                                        stars_info_band,
-                                        outpath_PSF_basename, N_PSF, sep_PSF,
-                                        save_image_PSF, image_PSF_size, 
-                                        save_image_noise,
-                                        outpath_dir,
-                                        i_expo,
-                                        gal_position_type,
-                                        g_const,
-                                        SimpleCam)
+                            para_list = dict(
+                                        tile_label=tile_label, band=band, pixel_scale=pixel_scale, rng_seed_band=rng_seed_band,
+                                        rms=rms, psf_info=psf_info,
+                                        g_cosmic=g_cosmic,
+                                        gals_info_band=gals_info_band, gal_rotation_angle=gal_rotation_angle,
+                                        stars_info_band=stars_info_band,
+                                        outpath_PSF_basename=outpath_PSF_basename, N_PSF=N_PSF, sep_PSF=sep_PSF,
+                                        save_image_PSF=save_image_PSF, image_PSF_size=image_PSF_size,
+                                        save_image_noise=save_image_noise,
+                                        outpath_dir=outpath_dir,
+                                        id_exposure=i_expo,
+                                        gal_position_type=gal_position_type,
+                                        g_const=g_const,
+                                        SimpleCam=SimpleCam)
                             para_lists.append(para_list)
                             # label
                             image_type_labels.append(image_type)
@@ -925,18 +927,20 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
                 # collected parameters
                 ## rotations simulated separately
                 for gal_rotation_angle in gal_rotation_angles:
-                    para_list = (tile_label, band, pixel_scale, rng_seed_band, outpath_image_basename,
-                                rms, psf_info,
-                                g_cosmic,
-                                gals_info_band, gal_rotation_angle,
-                                stars_info_band,
-                                outpath_PSF_basename, N_PSF, sep_PSF,
-                                save_image_chips, save_image_PSF, image_PSF_size,
-                                save_image_noise,
-                                outpath_dir,
-                                gal_position_type,
-                                g_const,
-                                SimpleCam)
+                    para_list = dict(
+                                tile_label=tile_label, band=band, pixel_scale=pixel_scale, rng_seed_band=rng_seed_band,
+                                outpath_image_basename=outpath_image_basename,
+                                rms=rms, psf_info=psf_info,
+                                g_cosmic=g_cosmic,
+                                gals_info_band=gals_info_band, gal_rotation_angle=gal_rotation_angle,
+                                stars_info_band=stars_info_band,
+                                outpath_PSF_basename=outpath_PSF_basename, N_PSF=N_PSF, sep_PSF=sep_PSF,
+                                save_image_chips=save_image_chips, save_image_PSF=save_image_PSF, image_PSF_size=image_PSF_size,
+                                save_image_noise=save_image_noise,
+                                outpath_dir=outpath_dir,
+                                gal_position_type=gal_position_type,
+                                g_const=g_const,
+                                SimpleCam=SimpleCam)
                     para_lists.append(para_list)
                     # label
                     image_type_labels.append(image_type)
@@ -949,8 +953,8 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
 
     # select the specific tile and rot that is needed
     if (needed_tile is not None):
-        para_lists = [para_list for para_list in para_lists if para_list[0]==needed_tile]
-        logger.warning(f'Only simulate tile {para_lists[0][0]}')
+        para_lists = [para_list for para_list in para_lists if para_list['tile_label']==needed_tile]
+        logger.warning(f'Only simulate tile {para_lists[0]["tile_label"]}')
 
     # start parallel running
     N_tasks = len(para_lists)

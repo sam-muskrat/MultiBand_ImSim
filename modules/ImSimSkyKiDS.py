@@ -37,19 +37,29 @@ def _PSFNoisySkyImages_KiDS_sameExpo(para_list):
         Adjoint to RunParallel_PSFNoisySkyImages in ImSim.py
     '''
 
-    (tile_label, band, pixel_scale, rng_seed_band, outpath_image_basename,
-        rms, psf_info,
-        g_cosmic,
-        gals_info_band, gal_rotation_angle,
-        stars_info_band,
-        outpath_PSF_basename, N_PSF, sep_PSF,
-        save_image_chips, save_image_PSF, image_PSF_size,
-        save_image_noise,
-        outpath_dir,
-        gal_position_type,
-        g_const,
-        SimpleCam) = para_list
-    
+    tile_label = para_list['tile_label']
+    band = para_list['band']
+    pixel_scale = para_list['pixel_scale']
+    rng_seed_band = para_list['rng_seed_band']
+    outpath_image_basename = para_list['outpath_image_basename']
+    rms = para_list['rms']
+    psf_info = para_list['psf_info']
+    g_cosmic = para_list['g_cosmic']
+    gals_info_band = para_list['gals_info_band']
+    gal_rotation_angle = para_list['gal_rotation_angle']
+    stars_info_band = para_list['stars_info_band']
+    outpath_PSF_basename = para_list['outpath_PSF_basename']
+    N_PSF = para_list['N_PSF']
+    sep_PSF = para_list['sep_PSF']
+    save_image_chips = para_list['save_image_chips']
+    save_image_PSF = para_list['save_image_PSF']
+    image_PSF_size = para_list['image_PSF_size']
+    save_image_noise = para_list['save_image_noise']
+    outpath_dir = para_list['outpath_dir']
+    gal_position_type = para_list['gal_position_type']
+    g_const = para_list['g_const']
+    SimpleCam = para_list['SimpleCam']
+
     assert not save_image_noise, 'KiDS_sameExpo does not support for save noise_image for now!'
 
     logger.info(f'Simulating KiDS_sameExpo image for tile {tile_label} band {band} rot {gal_rotation_angle}...')
@@ -279,19 +289,27 @@ def _PSFNoisySkyImages_KiDS_singleExpo(para_list):
         Used for different noise and psf for different exposures
         Adjoint to RunParallel_PSFNoisySkyImages in ImSim.py
     '''
-    (tile_label, band, pixel_scale, rng_seed_band,
-        rms, psf_info,
-        g_cosmic,
-        gals_info_band, gal_rotation_angle,
-        stars_info_band,
-        outpath_PSF_basename, N_PSF, sep_PSF,
-        save_image_PSF, image_PSF_size,
-        save_image_noise,
-        outpath_dir,
-        id_exposure,
-        gal_position_type,
-        g_const,
-        SimpleCam) = para_list
+    tile_label = para_list['tile_label']
+    band = para_list['band']
+    pixel_scale = para_list['pixel_scale']
+    rng_seed_band = para_list['rng_seed_band']
+    rms = para_list['rms']
+    psf_info = para_list['psf_info']
+    g_cosmic = para_list['g_cosmic']
+    gals_info_band = para_list['gals_info_band']
+    gal_rotation_angle = para_list['gal_rotation_angle']
+    stars_info_band = para_list['stars_info_band']
+    outpath_PSF_basename = para_list['outpath_PSF_basename']
+    N_PSF = para_list['N_PSF']
+    sep_PSF = para_list['sep_PSF']
+    save_image_PSF = para_list['save_image_PSF']
+    image_PSF_size = para_list['image_PSF_size']
+    save_image_noise = para_list['save_image_noise']
+    outpath_dir = para_list['outpath_dir']
+    id_exposure = para_list['id_exposure']
+    gal_position_type = para_list['gal_position_type']
+    g_const = para_list['g_const']
+    SimpleCam = para_list['SimpleCam']
 
     assert not save_image_noise, 'KiDS_singleExpo does not support for save noise_image for now!'
 
@@ -458,19 +476,27 @@ def _PSFNoisySkyImages_KiDS_varChips(para_list):
         different chips use different psfs
         Adjoint to RunParallel_PSFNoisySkyImages in ImSim.py
     '''
-    (tile_label, band, pixel_scale, rng_seed_band,
-        rms, psf_info_chips,
-        g_cosmic,
-        gals_info_band, gal_rotation_angle,
-        stars_info_band,
-        outpath_PSF_basename, N_PSF, sep_PSF,
-        save_image_PSF, image_PSF_size,
-        save_image_noise,
-        outpath_dir,
-        id_exposure,
-        gal_position_type,
-        g_const,
-        SimpleCam) = para_list
+    tile_label = para_list['tile_label']
+    band = para_list['band']
+    pixel_scale = para_list['pixel_scale']
+    rng_seed_band = para_list['rng_seed_band']
+    rms = para_list['rms']
+    psf_info_chips = para_list['psf_info_chips']
+    g_cosmic = para_list['g_cosmic']
+    gals_info_band = para_list['gals_info_band']
+    gal_rotation_angle = para_list['gal_rotation_angle']
+    stars_info_band = para_list['stars_info_band']
+    outpath_PSF_basename = para_list['outpath_PSF_basename']
+    N_PSF = para_list['N_PSF']
+    sep_PSF = para_list['sep_PSF']
+    save_image_PSF = para_list['save_image_PSF']
+    image_PSF_size = para_list['image_PSF_size']
+    save_image_noise = para_list['save_image_noise']
+    outpath_dir = para_list['outpath_dir']
+    id_exposure = para_list['id_exposure']
+    gal_position_type = para_list['gal_position_type']
+    g_const = para_list['g_const']
+    SimpleCam = para_list['SimpleCam']
 
     assert not save_image_noise, 'KiDS_varChips does not support for save noise_image for now!'
 
