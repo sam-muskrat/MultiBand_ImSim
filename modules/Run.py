@@ -1216,7 +1216,11 @@ def run_task_7_combine(configs_dict, tile_labels, needed_tile):
             logger.info(f'Combining outputs for tile {tile_label}, rot {gal_rotation_angle}...')
 
             # detection catalogue as the base
-            infile_tmp = glob.glob(os.path.join(out_dir_detec, f'tile{tile_label}_band*_rot{gal_rotation_angle:.0f}.feather'))[0]
+            glob_pattern = os.path.join(out_dir_detec, f'tile{tile_label}_band*_rot{gal_rotation_angle:.0f}.feather')
+            glob_result = glob.glob(glob_pattern)
+            if not glob_result:
+                raise FileNotFoundError(f'No detection catalogue found matching {glob_pattern}')
+            infile_tmp = glob_result[0]
             data_final = pd.read_feather(infile_tmp)
 
             # CrossMatch
