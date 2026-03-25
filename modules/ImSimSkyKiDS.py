@@ -171,12 +171,14 @@ def _PSFNoisySkyImages_KiDS_sameExpo(para_list):
     # +++ background noise
     noise_list = [NoiseModule.GaussianNoise(rms, rng_seed=int(rng_seed_band+120*gal_rotation_angle+94*id_exposure))
                                                         for id_exposure in range(n_exposures)]
+    noise_psf_list = [NoiseModule.GaussianNoise(rms, rng_seed=int(rng_seed_band+120*gal_rotation_angle+94*id_exposure+77))
+                                                        for id_exposure in range(n_exposures)]
 
     # +++ PSF map
     if (False in outpath_PSF_exist_list):
         mag_PSF_2 = 18. # for noise_flux = 2
         mag_PSF = mag_PSF_2 - 2.5*np.log10(rms/2.)
-        image_PSF = PSFModule.PSFmap(PSF, pixel_scale, mag_PSF, 
+        image_PSF = PSFModule.PSFmap(PSF, pixel_scale, mag_PSF,
                             N_PSF=N_PSF, sep_PSF=sep_PSF, rng_seed=rng_seed_band,
                             pixelPSF=psf_pixel)
 
@@ -185,7 +187,7 @@ def _PSFNoisySkyImages_KiDS_sameExpo(para_list):
                 image_PSF_tmp = image_PSF.copy()
 
                 ## noise background
-                noise_tmp = noise_list[i_ima]
+                noise_tmp = noise_psf_list[i_ima]
                 image_PSF_tmp.addNoise(noise_tmp)
 
                 ## save

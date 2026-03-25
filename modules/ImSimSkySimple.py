@@ -124,18 +124,19 @@ def _PSFNoisySkyImages_simple(para_list):
 
     # +++ background noise
     noise = NoiseModule.GaussianNoise(rms, rng_seed=int(rng_seed_band+120*gal_rotation_angle))
+    noise_psf = NoiseModule.GaussianNoise(rms, rng_seed=int(rng_seed_band+120*gal_rotation_angle+77))
     noise_2 = NoiseModule.GaussianNoise(rms, rng_seed=int(rng_seed_band+99))
 
     # +++ PSF map
     if (not outpath_PSF_exist):
         mag_PSF_2 = 18. # for noise_flux = 2
         mag_PSF = mag_PSF_2 - 2.5*np.log10(rms/2.)
-        image_PSF = PSFModule.PSFmap(PSF, pixel_scale, mag_PSF, 
+        image_PSF = PSFModule.PSFmap(PSF, pixel_scale, mag_PSF,
                         N_PSF=N_PSF, sep_PSF=sep_PSF, rng_seed=rng_seed_band,
                         pixelPSF=psf_pixel)
 
         ## noise background
-        image_PSF.addNoise(noise)
+        image_PSF.addNoise(noise_psf)
 
         ## save
         image_PSF.write(outpath_PSF_name)
