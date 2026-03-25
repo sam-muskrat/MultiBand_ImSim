@@ -974,13 +974,19 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
             image_type = image_type_labels[i_worker].lower()
             if image_type == 'varchips':
                 if survey.lower() == 'kids':
-                    p = mp.Process(target=_PSFNoisySkyImages_KiDS_varChips, args=(para_lists[i_worker],))                
+                    p = mp.Process(target=_PSFNoisySkyImages_KiDS_varChips, args=(para_lists[i_worker],))
+                else:
+                    raise Exception(f'Unsupported survey {survey} for image type {image_type}!')
             elif image_type == 'diffexpo':
                 if survey.lower() == 'kids':
                     p = mp.Process(target=_PSFNoisySkyImages_KiDS_singleExpo, args=(para_lists[i_worker],))
+                else:
+                    raise Exception(f'Unsupported survey {survey} for image type {image_type}!')
             elif image_type == 'sameexpo':
                 if survey.lower() == 'kids':
                     p = mp.Process(target=_PSFNoisySkyImages_KiDS_sameExpo, args=(para_lists[i_worker],))
+                else:
+                    raise Exception(f'Unsupported survey {survey} for image type {image_type}!')
             elif image_type == 'simple':
                 p = mp.Process(target=_PSFNoisySkyImages_simple, args=(para_lists[i_worker],))
             else:
