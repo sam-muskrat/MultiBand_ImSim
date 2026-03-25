@@ -531,7 +531,7 @@ def ParseConfig(config_file, taskIDs, run_tag, running_log):
                 raise Exception(f"makeglobalpsf dir {tmp} not found!")
 
         else:
-            raise Exception(f'Unsupported shape measurement method {MS_method}!')
+            raise Exception(f'Unsupported PSF modelling method {PSF_method}!')
 
         ### collect
         configs_dict['PSFmodelling'] = PSF_configs
