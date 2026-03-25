@@ -197,7 +197,7 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
         rng_seed_list = []
         i_ra = 0
         i_dec = 0
-        for i_tile, noise_info_tile in noise_info_selec.iterrows():
+        for i_tile, (_, noise_info_tile) in enumerate(noise_info_selec.iterrows()):
             tile_label = noise_info_tile['label']
 
             if (i_tile!=0) and (i_ra==0) and (i_dec==0):
@@ -457,7 +457,7 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
         else:
             dec_min = np.arcsin(dec_sin_min * np.pi / 180.) * 180. / np.pi
             dec_max = np.arcsin(dec_sin_max * np.pi / 180.) * 180. / np.pi
-        for i_tile, noise_info_tile in noise_info_selec.iterrows():
+        for i_tile, (_, noise_info_tile) in enumerate(noise_info_selec.iterrows()):
             tile_label = noise_info_tile['label']
 
             if (i_tile!=0) and (i_ra==0) and (i_dec==0):
@@ -666,7 +666,7 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
     # collect parameters for workers
     para_lists = []
     image_type_labels = []
-    for i_tile, noise_info_tile in noise_info_selec.iterrows():
+    for i_tile, (_, noise_info_tile) in enumerate(noise_info_selec.iterrows()):
 
         tile_label = noise_info_tile['label']
         rng_seed_tile = rng_seed_list[i_tile]
