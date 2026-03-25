@@ -709,6 +709,7 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
                         os.mkdir(psf_dir_tmp)
             else:
                 save_image_PSF = False
+                image_PSF_size = None
 
             # save noise image or not
             if image_noise is not None:
