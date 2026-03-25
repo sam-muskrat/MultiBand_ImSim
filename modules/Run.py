@@ -1304,6 +1304,8 @@ def run_task_7_combine(configs_dict, tile_labels, needed_tile):
                 if os.path.isfile(outfile):
                     os.remove(outfile)
                 Table.from_pandas(data_final).write(outfile, format='fits')
+            else:
+                raise Exception(f"Unsupported output format: {configs_dict['CC']['format']}!")
             logger.info(f'Combined catalogue saved as {outfile}')
 
     # clean up
