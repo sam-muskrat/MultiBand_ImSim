@@ -189,7 +189,7 @@ def GalInfo(cata_pathfile, primary_band, bands,
     del bulge_fractions, bulge_Re, bulge_axis_ratios, bulge_n, 
     del disk_Re, disk_axis_ratios
     ## magnitudes
-    band_names = bands
+    band_names = list(bands)
     if primary_band not in bands:
         band_names += [primary_band]
     gals_mag = pd.DataFrame(data=np.column_stack(mag_list), 

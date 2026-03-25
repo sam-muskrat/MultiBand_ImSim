@@ -65,6 +65,10 @@ def _run_metadetect_cell(args):
     if (ycen-half_size < 0) or (ycen+half_size > image_data.shape[0]) or \
     (xcen-half_size < 0) or (xcen+half_size > image_data.shape[1]):
         logger.debug(f'Skipping incomplete cell at xcen={xcen}, ycen={ycen}')
+        shm_img.close()
+        shm_weight_img.close()
+        if shm_name_noise_img is not None:
+            shm_noise_img.close()
         return pd.DataFrame()
 
     ## Extract cells
