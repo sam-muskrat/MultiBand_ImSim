@@ -41,9 +41,10 @@ def _grid_positions(N, sep, rng_seed):
     ## make random shift
     rng = np.random.RandomState(rng_seed)
     shift_lim = int(separation/5.)
-    dx_dy = rng.randint(low=-shift_lim, high=shift_lim, size=N)
-    x += dx_dy
-    y += dx_dy
+    dx = rng.randint(low=-shift_lim, high=shift_lim, size=N)
+    dy = rng.randint(low=-shift_lim, high=shift_lim, size=N)
+    x += dx
+    y += dy
     return x, y
 
 def parse_psf_info(psf_info, pixel_scale):
