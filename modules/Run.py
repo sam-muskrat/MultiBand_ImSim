@@ -973,7 +973,7 @@ def run_task_6_2_shapes(configs_dict, tile_labels, Nmax_proc, rng_seed, running_
         pathlib.Path(out_dir_tmp).mkdir(parents=True, exist_ok=True)
 
         ## save one core for safety
-        ams_cores = Nmax_proc - 1
+        ams_cores = max(1, Nmax_proc - 1)
         logger.info(f'Number of processes for FindAdaptiveMom: {ams_cores}')
         ## start running
         for i_band, band in enumerate(configs_dict['MS']['bands']):
@@ -1036,7 +1036,7 @@ def run_task_6_2_shapes(configs_dict, tile_labels, Nmax_proc, rng_seed, running_
         pathlib.Path(out_dir_tmp).mkdir(parents=True, exist_ok=True)
 
         ## save one core for safety
-        hsm_cores = Nmax_proc - 1
+        hsm_cores = max(1, Nmax_proc - 1)
         logger.info(f'Number of processes for EstimateShear: {hsm_cores}')
         ## start running
         for i_band, band in enumerate(configs_dict['MS']['bands']):
@@ -1111,7 +1111,7 @@ def run_task_6_2_shapes(configs_dict, tile_labels, Nmax_proc, rng_seed, running_
         pathlib.Path(out_dir_tmp).mkdir(parents=True, exist_ok=True)
 
         ## save one core for safety
-        metadetect_cores = Nmax_proc - 1
+        metadetect_cores = max(1, Nmax_proc - 1)
         logger.info(f'Number of processes for MetaDetect: {metadetect_cores}')
         ## start running
         for i_band, band in enumerate(configs_dict['MS']['bands']):
