@@ -394,7 +394,7 @@ def _PSFNoisySkyImages_KiDS_singleExpo(para_list):
             pixelPSF=psf_pixel)
 
         ## noise background
-        noise_psf = NoiseModule.GaussianNoise(rms, rng_seed=noise_base_seed)
+        noise_psf = NoiseModule.GaussianNoise(rms, rng_seed=noise_base_seed+223)
         image_PSF.addNoise(noise_psf)
 
         ## save

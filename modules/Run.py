@@ -51,20 +51,19 @@ def run_task_1_simulate(configs_dict, Nmax_proc, rng_seed, g_cosmic, g_columns, 
     survey = configs_dict['imsim']['survey']
     gal_position_type = configs_dict['gal']['position_type']
     outfile_tmp = os.path.join(configs_dict['work_dirs']['main'], f'basic_info.txt')
-    f = open(outfile_tmp, 'w')
-    print(f'# Some basic info about the simulated images in this directory\n\
+    with open(outfile_tmp, 'w') as f:
+        print(f'# Some basic info about the simulated images in this directory\n\
         run_tag            =   {run_tag}\n\
         survey             =   {survey}\n\
         gal_position_type  =   {gal_position_type}\n\
         contain_stars      =   {contain_stars}', file=f)
-    if g_columns is None:
-        print(f'g_cosmic           =   {g_cosmic[0]} {g_cosmic[1]}', file=f)
-    else:
-        print(f'g_cosmic           =    variable', file=f)
-    if contain_stars=='True':
-        star_position_type = configs_dict['star']['position_type']
-        print(f'star_position_type =   {star_position_type}', file=f)
-    f.close()
+        if g_columns is None:
+            print(f'g_cosmic           =   {g_cosmic[0]} {g_cosmic[1]}', file=f)
+        else:
+            print(f'g_cosmic           =    variable', file=f)
+        if contain_stars=='True':
+            star_position_type = configs_dict['star']['position_type']
+            print(f'star_position_type =   {star_position_type}', file=f)
     logger.info(f'Setup info saved to {outfile_tmp}')
 
     ## I/O

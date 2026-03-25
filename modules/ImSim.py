@@ -955,6 +955,8 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
     # select the specific tile and rot that is needed
     if (needed_tile is not None):
         para_lists = [para_list for para_list in para_lists if para_list['tile_label']==needed_tile]
+        if not para_lists:
+            raise ValueError(f'No tasks found for tile {needed_tile}!')
         logger.warning(f'Only simulate tile {para_lists[0]["tile_label"]}')
 
     # start parallel running
