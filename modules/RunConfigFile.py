@@ -166,28 +166,16 @@ def ParseConfig(config_file, taskIDs, run_tag, running_log):
         imsim_configs['casual_mag'] = 99.
 
     ### how to calculate the sky area
-    simple_area = config_imsim.getboolean('simple_area')
-    if simple_area is None:
-        ## old code is using the simple way
-        imsim_configs['simple_area'] = True
-    else:
-        imsim_configs['simple_area'] = simple_area
+    ## old code doesn't have this parameter, default to True
+    imsim_configs['simple_area'] = config_imsim.getboolean('simple_area', fallback=True)
 
     ### how to cut the sky
-    simple_cut = config_imsim.getboolean('simple_cut')
-    if simple_cut is None:
-        ## old code is using the simple way
-        imsim_configs['simple_cut'] = True
-    else:
-        imsim_configs['simple_cut'] = simple_cut
+    ## old code doesn't have this parameter, default to True
+    imsim_configs['simple_cut'] = config_imsim.getboolean('simple_cut', fallback=True)
 
     ### how to perform transformations
-    simple_camera = config_imsim.getboolean('simple_camera')
-    if simple_camera is None:
-        ## old code is using the simple way
-        imsim_configs['simple_camera'] = True
-    else:
-        imsim_configs['simple_camera'] = simple_camera
+    ## old code doesn't have this parameter, default to True
+    imsim_configs['simple_camera'] = config_imsim.getboolean('simple_camera', fallback=True)
 
     ### collect
     configs_dict['imsim'] = imsim_configs
