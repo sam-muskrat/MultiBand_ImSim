@@ -2,7 +2,7 @@
 # @Author: lshuns
 # @Date:   2021-02-03, 15:58:35
 # @Last Modified by:   lshuns
-# @Last Modified time: 2026-01-20 16:49:33
+# @Last Modified time: 2026-03-25 16:18:32
 
 ### module to generate an example configuration file
 
@@ -36,7 +36,7 @@ def ParseConfig(config_file, taskIDs, run_tag, running_log):
     ## existence
     try:
         config.read(config_file)
-    except TypeError:
+    except (TypeError, FileNotFoundError):
         raise Exception("No configuration file provided! \n"
                         "------> To generate an example file, use `python Run.py 0`.")
 
@@ -378,14 +378,17 @@ def ParseConfig(config_file, taskIDs, run_tag, running_log):
                 raise Exception("mag_faint_cut has to be brighter than the casual_mag!")
 
             ### match with TAN projection
-            use_TAN = config_cross.getboolean('use_TAN')
-            if use_TAN is None:
+            try:
+                sex_configs['use_TAN'] = config_cross.getboolean('use_TAN')
+            except (configparser.NoSectionError, configparser.NoOptionError):
                 ## old code is using the sky coordinates
                 sex_configs['use_TAN'] = False
-            else:
-                sex_configs['use_TAN'] = use_TAN
 
-            sex_configs['r_max_pixel'] = config_cross.getfloat('r_max_pixel')
+            try:
+                sex_configs['r_max_pixel'] = config_cross.getfloat('r_max_pixel')
+            except (configparser.NoSectionError, configparser.NoOptionError):
+                sex_configs['r_max_pixel'] = 3.
+                logger.warning('r_max_pixel not found in config, using default value 3 pixels.')
 
         ### collect
         configs_dict['sex'] = sex_configs

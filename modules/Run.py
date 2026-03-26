@@ -2,9 +2,10 @@
 # @Author: lshuns
 # @Date:   2020-12-21 11:44:14
 # @Last Modified by:   lshuns
-# @Last Modified time: 2026-01-20 16:54:39
+# @Last Modified time: 2026-03-25 13:47:22
 
 ### main module to run the whole pipeline
+__version__ = "MultiBand_ImSim v1.0.0"
 
 import re
 import os
@@ -16,6 +17,12 @@ import logging
 import pathlib
 import datetime
 import argparse
+
+# Limit each subprocess to one core to prevent thread oversubscription
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+os.environ['MKL_NUM_THREADS'] = '1'
+os.environ['NUMEXPR_NUM_THREADS'] = '1'
 
 import numpy as np
 import pandas as pd
@@ -640,6 +647,8 @@ def run_task_4_photometry(configs_dict, tile_labels, Nmax_proc, running_log, nee
         ### check for any errors during run
         for proc in proc_list:
             proc.join()
+            if proc.exitcode != 0:
+                raise RuntimeError(f'GAaP worker {proc.name} failed with exit code {proc.exitcode}')
 
         ## clean tmp
         if configs_dict['MP']['clean_up_level'] >= 1:
@@ -1322,8 +1331,6 @@ def run_task_7_combine(configs_dict, tile_labels, needed_tile):
 
 
 if __name__ == "__main__":
-
-    __version__ = "MultiBand_ImSim v0.9.2"
 
     # ++++++++++++++ parser for command-line interfaces
     parser = argparse.ArgumentParser(

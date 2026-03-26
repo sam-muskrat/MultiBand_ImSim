@@ -8,7 +8,7 @@
 
 ###### dependence (surveys):
 ######      ImSimSkySimple: Simple image without any survey strategy
-######      ImSimSkyKiDS: KiDS-like images 
+######      ImSimSkyKiDS: KiDS-like images
 from ImSimSkySimple import _PSFNoisySkyImages_simple
 from ImSimSkyKiDS import _PSFNoisySkyImages_KiDS_sameExpo, _PSFNoisySkyImages_KiDS_singleExpo, _PSFNoisySkyImages_KiDS_varChips
 
@@ -17,8 +17,15 @@ import re
 import math
 import time
 import random
+import hashlib
 import logging
 import multiprocessing as mp
+
+# Limit each subprocess to one core to prevent thread oversubscription
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+os.environ['MKL_NUM_THREADS'] = '1'
+os.environ['NUMEXPR_NUM_THREADS'] = '1'
 
 import numpy as np
 import pandas as pd
@@ -204,7 +211,8 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
                 logger.warning(f'repeating patterns started from tile {tile_label}')
 
             # rng seed associated with tile labels
-            rng_seed_tile = rng_seed + np.array(re.findall(r"\d+", tile_label), dtype=int).sum()*54
+            # use a hash to avoid collisions between tiles whose digits sum to the same value
+            rng_seed_tile = rng_seed + int(hashlib.md5(str(tile_label).encode()).hexdigest(), 16) % (2**31)
             rng_seed_list.append(int(rng_seed_tile))
 
             ## output noise info
@@ -284,9 +292,9 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
                     Ngal = Ngal0
 
                 ### random sample positions
-                rng_ra = np.random.RandomState(int(rng_seed_tile * 11))
+                rng_ra = np.random.RandomState(int(rng_seed_tile * 11) % (2**32))
                 RA_random = rng_ra.uniform(low=ra_min, high=ra_max, size=Ngal)
-                rng_dec = np.random.RandomState(int(rng_seed_tile * 62))
+                rng_dec = np.random.RandomState(int(rng_seed_tile * 62) % (2**32))
                 DEC_random = rng_dec.uniform(low=dec_min, high=dec_max, size=Ngal)
                 ###### assign
                 gals_info_selec[0].loc[:, 'RA'] = RA_random[:Ngal0]
@@ -348,9 +356,9 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
                     del mask_star
 
                     ## randomly place stars
-                    rng_star_ra = np.random.RandomState(int(rng_seed_tile * 90))
+                    rng_star_ra = np.random.RandomState(int(rng_seed_tile * 90) % (2**32))
                     stars_info_selec.loc[:, 'RA'] = rng_star_ra.uniform(low=ra_min, high=ra_max, size=Nstar_even)
-                    rng_star_dec = np.random.RandomState(int(rng_seed_tile * 63))
+                    rng_star_dec = np.random.RandomState(int(rng_seed_tile * 63) % (2**32))
                     stars_info_selec.loc[:, 'DEC'] = rng_star_dec.uniform(low=dec_min, high=dec_max, size=Nstar_even)
 
                 elif star_position_type == 'true':
@@ -464,7 +472,8 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
                 logger.warning(f'repeating patterns started from tile {tile_label}')
 
             # rng seed associated with tile labels
-            rng_seed_tile = rng_seed + np.array(re.findall(r"\d+", tile_label), dtype=int).sum()*54
+            # use a hash to avoid collisions between tiles whose digits sum to the same value
+            rng_seed_tile = rng_seed + int(hashlib.md5(str(tile_label).encode()).hexdigest(), 16) % (2**31)
             rng_seed_list.append(int(rng_seed_tile))
 
             ## output noise info
@@ -532,9 +541,9 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
                     Ngal = Ngal0
 
                 ### random sample positions
-                rng_ra = np.random.RandomState(int(rng_seed_tile * 11))
+                rng_ra = np.random.RandomState(int(rng_seed_tile * 11) % (2**32))
                 RA_random = rng_ra.uniform(low=ra_min, high=ra_max, size=Ngal)
-                rng_dec = np.random.RandomState(int(rng_seed_tile * 62))
+                rng_dec = np.random.RandomState(int(rng_seed_tile * 62) % (2**32))
                 DEC_random = rng_dec.uniform(low=dec_min, high=dec_max, size=Ngal)
                 ###### assign
                 gals_info_selec[0].loc[:, 'RA'] = RA_random[:Ngal0]
@@ -597,9 +606,9 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
                     del mask_star
 
                     ## randomly place stars
-                    rng_star_ra = np.random.RandomState(int(rng_seed_tile * 90))
+                    rng_star_ra = np.random.RandomState(int(rng_seed_tile * 90) % (2**32))
                     stars_info_selec.loc[:, 'RA'] = rng_star_ra.uniform(low=ra_min, high=ra_max, size=Nstar_even)
-                    rng_star_dec = np.random.RandomState(int(rng_seed_tile * 63))
+                    rng_star_dec = np.random.RandomState(int(rng_seed_tile * 63) % (2**32))
                     stars_info_selec.loc[:, 'DEC'] = rng_star_dec.uniform(low=dec_min, high=dec_max, size=Nstar_even)
 
                 elif star_position_type == 'true':
@@ -1000,5 +1009,7 @@ def RunParallel_PSFNoisySkyImages(survey, outpath_dir, outcata_dir, rng_seed, ma
             time.sleep(1.)
     for p in p_list:
         p.join()
+        if p.exitcode != 0:
+            raise RuntimeError(f'Worker for tile {p.name} failed with exit code {p.exitcode}')
 
     logger.info('ImSim pipeline finished.')

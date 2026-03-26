@@ -55,7 +55,7 @@ def _build_galaxy_model(gal_info, band, gal_rotation_angle, g_cosmic, g_const, P
     # +++ Simulation
     n_gal = gal_info['sersic_n']
     re_gal = gal_info['Re']
-    if (n_gal >= SERSIC_N_CUT[0]) and (n_gal <= SERSIC_N_CUT[1]) and (re_gal >= RE_CUT[0]) and (re_gal <= RE_CUT[1]):
+    if (n_gal >= SERSIC_N_CUT[0]) and (n_gal <= SERSIC_N_CUT[1]) and (re_gal > RE_CUT[0]) and (re_gal <= RE_CUT[1]):
         ### sersic profile
         # allowed sersic index range
         if (n_gal < SERSIC_N_MIN) or (n_gal > SERSIC_N_MAX):
@@ -72,6 +72,8 @@ def _build_galaxy_model(gal_info, band, gal_rotation_angle, g_cosmic, g_const, P
         # bulge
         bulge_fraction = gal_info['bulge_fraction']
         bulge_n = gal_info['bulge_n']
+        if (bulge_n < SERSIC_N_MIN) or (bulge_n > SERSIC_N_MAX):
+            bulge_n = float(np.where(bulge_n<SERSIC_N_MIN, SERSIC_N_MIN, SERSIC_N_MAX))
         bulge_q = gal_info['bulge_axis_ratio']
         if  (bulge_q < Q_MIN) or (bulge_q > Q_MAX):
             bulge_q = float(np.where(bulge_q<Q_MIN, Q_MIN, Q_MAX))
@@ -448,6 +450,9 @@ def StarsImage(canvas, band, pixel_scale, PSF,
     x_stars, y_stars = wcs.toImage(RA_stars, DEC_stars, units=galsim.degrees)
     logger.debug(f'Total number of input stars: {len(x_stars)}')
     del RA_stars, DEC_stars, wcs
+    ## 0.5 for offset (difference between GalSim and Sextractor)
+    x_stars = x_stars + 0.5
+    y_stars = y_stars + 0.5
 
     # ignore those out of the boundaries
     mask_tmp = (x_stars>=bounds.xmin) & (x_stars<=bounds.xmax) & (y_stars>=bounds.ymin) & (y_stars<=bounds.ymax)
@@ -462,9 +467,8 @@ def StarsImage(canvas, band, pixel_scale, PSF,
     for i_star, star_info in stars_info_selec.iterrows():
 
         # position
-        ## 0.5 for offset (difference between GalSim and Sextractor)
-        x_star = x_stars[i_star] + 0.5
-        y_star = y_stars[i_star] + 0.5
+        x_star = x_stars[i_star]
+        y_star = y_stars[i_star]
         ## to int
         ix_star = int(math.floor(x_star + 0.5))
         iy_star = int(math.floor(y_star + 0.5))

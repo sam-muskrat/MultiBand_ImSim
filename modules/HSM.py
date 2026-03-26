@@ -2,9 +2,9 @@
 # @Author: lshuns
 # @Date:   1969-12-31 16:00:00
 # @Last Modified by:   lshuns
-# @Last Modified time: 2025-12-02 15:32:08
+# @Last Modified time: 2026-03-25 16:13:42
 
-### Galaxty shape measurement using HSM module from GalSim
+### Galaxy shape measurement using HSM module from GalSim
 
 import os
 import logging
@@ -39,8 +39,9 @@ def _worker_ams(args):
     seg_data = np.ndarray(seg_shape, dtype=np.dtype(seg_dtype), buffer=shm_seg.buf)
 
     # extract postage stamp
-    xcen_int = int(np.round(xcen))
-    ycen_int = int(np.round(ycen))
+    # SExtractor X_IMAGE/Y_IMAGE are 1-indexed; convert to 0-indexed for numpy
+    xcen_int = int(np.round(xcen)) - 1
+    ycen_int = int(np.round(ycen)) - 1
     half_size = postage_size // 2
     ## check boundaries
     if (xcen_int - half_size < 0 or
@@ -48,7 +49,7 @@ def _worker_ams(args):
         xcen_int + half_size >= img_shape[1] or
         ycen_int + half_size >= img_shape[0]):
         shm_img.close(); shm_seg.close()
-        return (idx, -999, -999, -999, -999, -999)    
+        return (idx, -999, -999, -999, -999, -999)
     stamp_image = image_data[ycen_int-half_size:ycen_int+half_size,
                              xcen_int-half_size:xcen_int+half_size]
     stamp_seg = seg_data[ycen_int-half_size:ycen_int+half_size,
@@ -171,7 +172,7 @@ def AdaptiveMomShape(outpath_feather,
     if save_Nstamps > 0: 
         rng_stamps = np.random.RandomState(random_seed + save_Nstamps)
         saved_indices = rng_stamps.choice(detec_cata.index,
-                                          size=save_Nstamps,
+                                          size=min(save_Nstamps, len(detec_cata)),
                                           replace=False) 
         stamp_dir = os.path.join(os.path.dirname(outpath_feather), 
                                  'stamps_AMS') 
@@ -199,7 +200,9 @@ def AdaptiveMomShape(outpath_feather,
     ## other useful parameters from detection catalogue
     id_detec = detec_cata['NUMBER'].values
     #### calculate weight based on SNR
-    snr_detec = detec_cata['FLUX_AUTO'].values / detec_cata['FLUXERR_AUTO'].values
+    fluxerr = detec_cata['FLUXERR_AUTO'].values
+    fluxerr = np.where(fluxerr == 0, np.inf, fluxerr)
+    snr_detec = detec_cata['FLUX_AUTO'].values / fluxerr
     weights = 1.0 / (_sigma_e_from_SNR(snr_detec, 
                                        sigma_fromSNR_amp, 
                                        sigma_fromSNR_index, 
@@ -208,13 +211,14 @@ def AdaptiveMomShape(outpath_feather,
 
     ## run in parallel
     results = []
-    with ProcessPoolExecutor(max_workers=max_cores) as exe:
-        for res in exe.map(_worker_ams, job_args):
-            results.append(res)
-
-    # free shared memory
-    shm_img.close(); shm_img.unlink()
-    shm_seg.close(); shm_seg.unlink()
+    try:
+        with ProcessPoolExecutor(max_workers=max_cores) as exe:
+            for res in exe.map(_worker_ams, job_args):
+                results.append(res)
+    finally:
+        # free shared memory
+        shm_img.close(); shm_img.unlink()
+        shm_seg.close(); shm_seg.unlink()
 
     # build output catalogue
     shape_cata = pd.DataFrame({
@@ -264,8 +268,9 @@ def _worker_hsm(args):
     seg_data = np.ndarray(seg_shape, dtype=np.dtype(seg_dtype), buffer=shm_seg.buf)
 
     # extract postage stamp
-    xcen_int = int(np.round(xcen))
-    ycen_int = int(np.round(ycen))
+    # SExtractor X_IMAGE/Y_IMAGE are 1-indexed; convert to 0-indexed for numpy
+    xcen_int = int(np.round(xcen)) - 1
+    ycen_int = int(np.round(ycen)) - 1
     half_size = postage_size // 2
     ## check boundaries
     if (xcen_int - half_size < 0 or
@@ -421,7 +426,7 @@ def EstimateShear_samePSF(outpath_feather,
     if save_Nstamps > 0: 
         rng_stamps = np.random.RandomState(random_seed + save_Nstamps)
         saved_indices = rng_stamps.choice(detec_cata.index,
-                                          size=save_Nstamps,
+                                          size=min(save_Nstamps, len(detec_cata)),
                                           replace=False) 
         stamp_dir = os.path.join(os.path.dirname(outpath_feather), 
                                  'stamps_AMS') 
@@ -452,7 +457,9 @@ def EstimateShear_samePSF(outpath_feather,
     ## other useful parameters from detection catalogue
     id_detec = detec_cata['NUMBER'].values
     #### calculate weight based on SNR
-    snr_detec = detec_cata['FLUX_AUTO'].values / detec_cata['FLUXERR_AUTO'].values
+    fluxerr = detec_cata['FLUXERR_AUTO'].values
+    fluxerr = np.where(fluxerr == 0, np.inf, fluxerr)
+    snr_detec = detec_cata['FLUX_AUTO'].values / fluxerr
     weights = 1.0 / (_sigma_e_from_SNR(snr_detec, 
                                        sigma_fromSNR_amp, 
                                        sigma_fromSNR_index, 
@@ -461,13 +468,14 @@ def EstimateShear_samePSF(outpath_feather,
 
     ## run in parallel
     results = []
-    with ProcessPoolExecutor(max_workers=max_cores) as exe:
-        for res in exe.map(_worker_hsm, job_args):
-            results.append(res)
-
-    # free shared memory
-    shm_img.close(); shm_img.unlink()
-    shm_seg.close(); shm_seg.unlink()
+    try:
+        with ProcessPoolExecutor(max_workers=max_cores) as exe:
+            for res in exe.map(_worker_hsm, job_args):
+                results.append(res)
+    finally:
+        # free shared memory
+        shm_img.close(); shm_img.unlink()
+        shm_seg.close(); shm_seg.unlink()
 
     # build output catalogue
     if shear_est in ['REGAUSS', 'LINEAR', 'BJ']:
