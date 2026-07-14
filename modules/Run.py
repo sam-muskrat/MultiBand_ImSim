@@ -920,7 +920,7 @@ def run_task_6_1_psfmodel(configs_dict, tile_labels, Nmax_proc, running_log, nee
     logger.info(f'====== Task 6_1: PSF modelling === finished in {(time.time()-start_time)/3600.} h ======')
 
 
-def run_task_6_2_shapes(configs_dict, tile_labels, Nmax_proc, rng_seed, running_log, needed_tile):
+def run_task_6_2_shapes(configs_dict, tile_labels, Nmax_proc, rng_seed, running_log, needed_tile, PSF_size_error=0.0):
     """Task 6_2: measure galaxy shapes."""
     logger.info('====== Task 6_2: measure galaxy shapes === started ======')
     start_time = time.time()
@@ -1170,6 +1170,44 @@ def run_task_6_2_shapes(configs_dict, tile_labels, Nmax_proc, rng_seed, running_
         ## save one core for safety
         metadetect_cores = max(1, Nmax_proc - 1)
         logger.info(f'Number of processes for MetaDetect: {metadetect_cores}')
+
+        ## PSF size error: regenerate a biased-seeing Moffat PSF for MetaDetect only
+        ##  (the images/PSF used for simulation are untouched)
+        if PSF_size_error != 0.:
+            import ImSimPSF
+            logger.info(f'PSF_size_error={PSF_size_error} requested: '
+                        f'MetaDetect will use a PSF with {1.+PSF_size_error:.4f}x the true seeing.')
+            ###### >>> for old versions
+            try:
+                noise_psf_basenames = configs_dict['noise']['noise_psf_basenames']
+                label_basename = None
+                noise_basenames = None
+                psf_basenames_moffat = None
+                psf_basenames_airy = None
+                id_basenames = None
+            ###### >>> new version
+            except KeyError:
+                noise_psf_basenames = None
+                label_basename = configs_dict['noise']['label_basename']
+                noise_basenames = configs_dict['noise']['noise_basenames']
+                psf_basenames_moffat = configs_dict['noise']['psf_basenames_moffat']
+                psf_basenames_airy = configs_dict['noise']['psf_basenames_airy']
+                try:
+                    id_basenames = configs_dict['noise']['id_basenames']
+                except KeyError:
+                    id_basenames = None
+            ## NOTE: only the single-PSF-per-tile case (required by metadetect_same_PSF) is supported,
+            ##  so diffExpo/varChips exposure/chip info is not needed here.
+            noise_info_psf = LoadCata.NoiseInfo(configs_dict['noise']['file'], configs_dict['imsim']['bands'],
+                            only_labels=False,
+                            psf_type_list=configs_dict['noise']['psf_type_list'],
+                            noise_psf_basenames=noise_psf_basenames,
+                            label_basename=label_basename, noise_basenames=noise_basenames,
+                            psf_basenames_moffat=psf_basenames_moffat, psf_basenames_airy=psf_basenames_airy,
+                            id_basenames=id_basenames,
+                            file4varChips=configs_dict['noise']['file4varChips'],
+                            psf_PixelIma_dir=configs_dict['noise']['psf_PixelIma_dir'])
+
         ## start running
         for i_band, band in enumerate(configs_dict['MS']['bands']):
             logger.info(f'Measure shapes for band {band}...')
@@ -1180,6 +1218,16 @@ def run_task_6_2_shapes(configs_dict, tile_labels, Nmax_proc, rng_seed, running_
 
             metadetect_pixel_scale = configs_dict['MS']['metadetect_pixel_scale_list'][i_band]
             metadetect_config_file = configs_dict['MS']['metadetect_config_files'][i_band]
+
+            if PSF_size_error != 0.:
+                i_band_imsim = configs_dict['imsim']['bands'].index(band)
+                psf_type_band = configs_dict['noise']['psf_type_list'][i_band_imsim]
+                if psf_type_band.lower() != 'moffat':
+                    raise Exception(f'PSF_size_error is only supported for Moffat PSFs (band {band} uses {psf_type_band})!')
+                image_type_band = configs_dict['imsim']['image_type_list'][i_band_imsim].lower()
+                if image_type_band in ('diffexpo', 'varchips'):
+                    raise Exception(f'PSF_size_error is not supported for diffExpo/varChips bands (band {band})!')
+                pixel_scale_sim = configs_dict['imsim']['pixel_scale_list'][i_band_imsim]
 
             for tile_label in tile_labels:
                 if (needed_tile is not None) and (tile_label!=needed_tile):
@@ -1207,6 +1255,26 @@ def run_task_6_2_shapes(configs_dict, tile_labels, Nmax_proc, rng_seed, running_
                         inpath_psf_image = os.path.join(in_ima_dir_tmp,
                                                         f'psf_tile{tile_label}_band{band}',
                                                         'psf_ima.fits')
+
+                        ## build a biased-seeing PSF for MetaDetect, if requested
+                        if PSF_size_error != 0.:
+                            noise_row = noise_info_psf.loc[noise_info_psf['label']==tile_label].iloc[0]
+                            seeing_true = noise_row[f'seeing_{band}']
+                            beta = noise_row[f'beta_{band}']
+                            psf_e1 = noise_row[f'psf_e1_{band}']
+                            psf_e2 = noise_row[f'psf_e2_{band}']
+                            psf_e = None if (psf_e1==0. and psf_e2==0.) else [psf_e1, psf_e2]
+                            seeing_detect = seeing_true * (1. + PSF_size_error)
+
+                            inpath_psf_image = os.path.join(in_ima_dir_tmp,
+                                                        f'psf_tile{tile_label}_band{band}',
+                                                        f'psf_ima_detect_err{PSF_size_error:+.4f}.fits')
+                            if not os.path.isfile(inpath_psf_image):
+                                PSF_detect = ImSimPSF.MoffatPSF(seeing_detect, beta, psf_e)
+                                psf_ima_detect = ImSimPSF.PSFima(PSF_detect, pixel_scale_sim,
+                                                    size=configs_dict['imsim']['image_PSF_size'], pixelPSF=False)
+                                psf_ima_detect.write(inpath_psf_image)
+                                logger.info(f'Biased-seeing PSF image saved as {inpath_psf_image}')
 
                         # run
                         MetaDetect.MetaDetectShear(outpath_feather,
@@ -1435,6 +1503,12 @@ if __name__ == "__main__":
     parser.add_argument(
         '--stars_only', action="store_true",
         help="If set, skip galaxy generation (stars only).")
+    parser.add_argument(
+        '--PSF_size_error', type=float, default=0.0, metavar='PSF_size_error',
+        help="Percent error (as a fraction) applied to the Moffat PSF 'seeing' used\n"
+             "   by MetaDetect during shape measurement only; image simulation is\n"
+             "   unaffected. E.g. 0.01 -> MetaDetect sees a PSF with 1.01x the true FWHM.\n"
+             "   (default: %(default)s, i.e. no PSF size error)")
 
     ## arg parser
     args = parser.parse_args()
@@ -1449,6 +1523,7 @@ if __name__ == "__main__":
     running_log = args.sep_running_log
     needed_tile = args.needed_tile
     stars_only = args.stars_only
+    PSF_size_error = args.PSF_size_error
 
     ## logging
     numeric_level = getattr(logging, log_level.upper(), None)
@@ -1543,7 +1618,7 @@ if __name__ == "__main__":
 
     # 6_2: measure galaxy shapes
     if ('6_2' in taskIDs) or ('all' in taskIDs):
-        run_task_6_2_shapes(configs_dict, tile_labels, Nmax_proc, rng_seed, running_log, needed_tile)
+        run_task_6_2_shapes(configs_dict, tile_labels, Nmax_proc, rng_seed, running_log, needed_tile, PSF_size_error)
 
     # 7: create a combined catalogue
     if ('7' in taskIDs) or ('all' in taskIDs):
