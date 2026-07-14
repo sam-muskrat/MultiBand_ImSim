@@ -35,7 +35,7 @@ def _run_metadetect_cell(args):
     """
     Run metadetect for each cell
     """
-    (xcen, ycen, full_wcs, psf_img, cfg, mdet_seed,
+    (cell_id, xcen, ycen, full_wcs, psf_img, cfg, mdet_seed,
      shm_name_img, img_shape, img_dtype,
      shm_name_weight_img, img_weight_shape, img_weight_dtype,
      cell_size, central_size, pixel_scale,
@@ -200,8 +200,9 @@ def _run_metadetect_cell(args):
             continue
         
         ## Create a dictionary for this key
-        res_key = {'shear_type': [key] * len(idx_centre)}  
+        res_key = {'shear_type': [key] * len(idx_centre)}
 
+        
         ## Unpack the results
         for col in res[key].dtype.names:
             if len(res[key][col].shape) == 1:
@@ -214,6 +215,27 @@ def _run_metadetect_cell(args):
                 res_key[f'{col}_as_sigma'] = np.sqrt(
                     np.trace(res[key][col][idx_centre], 
                              axis1=1, axis2=2) /2. )
+
+                
+## ----- EDIT BY SAM ------ ###
+
+        # Add cell id in catalog
+        res_key['cell_id'] = cell_id
+
+        #overall image pad calculated earlier in MetaDetectShear()
+        pad = (cell_size - central_size) // 2
+
+        # Add global location in overall image, accounting for padding
+        res_key['sx_col_global'] = np.array(res_key['sx_col']) + (xcen - cell_size // 2) - pad
+        res_key['sx_row_global'] = np.array(res_key['sx_row']) + (ycen - cell_size //2) - pad
+
+        res_key['sx_col_noshear_global'] = np.array(res_key['sx_col_noshear']) + (xcen - cell_size // 2) - pad
+        res_key['sx_row_noshear_global'] = np.array(res_key['sx_row_noshear']) + (ycen - cell_size // 2) - pad
+
+
+### ------ END SAM EDIT ------ #####
+
+
         
         ## Convert to DataFrame and add to list
         df_key = pd.DataFrame(res_key)
@@ -387,6 +409,7 @@ def MetaDetectShear(outpath_feather,
         for ix in range(Nx):
             ycen = iy * step_size + cell_size // 2
             xcen = ix * step_size + cell_size // 2
+            cell_id = iy * Nx + ix
             if (save_Ncells > 0) and (
                 ((iy * Nx + ix) in saved_cell_indices) 
                 or ((iy==0) and (ix==0))
@@ -400,7 +423,7 @@ def MetaDetectShear(outpath_feather,
             else:
                 outpath_cell = None
                 outpath_cell_cata = None
-            job_arg = [xcen, ycen, full_wcs, psf_img, cfg, random_seed + iy * Nx + ix,
+            job_arg = [cell_id, xcen, ycen, full_wcs, psf_img, cfg, random_seed + iy * Nx + ix,
                        shm_img.name, shm_img_arr.shape, str(shm_img_arr.dtype),
                        shm_weight_img.name, shm_weight_img_arr.shape, str(shm_weight_img_arr.dtype),
                        cell_size, central_size, pixel_scale,

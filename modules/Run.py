@@ -45,7 +45,7 @@ import RunConfigFile
 logger = logging.getLogger(__name__)
 
 
-def run_task_1_simulate(configs_dict, Nmax_proc, rng_seed, g_cosmic, g_columns, run_tag, needed_tile):
+def run_task_1_simulate(configs_dict, Nmax_proc, rng_seed, g_cosmic, g_columns, run_tag, needed_tile, stars_only):
     """Task 1: simulate images."""
     import ImSim
     logger.info('====== Task 1: simulate images === started ======')
@@ -128,26 +128,75 @@ def run_task_1_simulate(configs_dict, Nmax_proc, rng_seed, g_cosmic, g_columns, 
                     file4varChips=configs_dict['noise']['file4varChips'], varChips_list=varChips_list, N_chips_list=N_chips_list,
                     psf_PixelIma_dir=configs_dict['noise']['psf_PixelIma_dir'])
 
-    ## load galaxy info
-    gals_info = LoadCata.GalInfo(configs_dict['gal']['file'], configs_dict['imsim']['detection_band'], configs_dict['imsim']['bands'],
+
+    ### -------- MODIFIED BY SAM ---------- ####
+    
+    ## load galaxy info, only if stars_only tag is not enabled - otherwise generate skeleton gal info catalog
+    if stars_only:
+        logger.info('Stars-only mode: creating skeleton galaxy catalog')
+    
+        #Determine tile area from survey type
+        if 'simple' in configs_dict['imsim']['survey']:
+            import re
+            numeric_const_pattern = r"[-+]?(?:(?:\d*\.\d+)|(?:\d+\.?))(?:[Ee][+-]?\d+)?"
+            area_tot = float(re.findall(numeric_const_pattern, configs_dict['imsim']['survey'])[0])
+            area_size = area_tot**0.5  # e.g., 0.02 sq deg -> 0.1414 deg per side
+            configs_dict['imsim']['survey'] = 'one_tile' # convert remaining procedure to one-tile setting, printing entire catalog defined below
+        else:
+            logger.warning('No area specified in stars-only mode: use survey type "simple_Nsqdeg" - using default ( 1 sq. deg)')
+            area_size = 1.0  # Default 1 sq. deg
+            configs_dict['imsim']['survey'] = 'one_tile' # convert rest of procedure to one-tile setting, printing entire catalog defined below
+            
+            
+        # Create 4 corner galaxies to define the field - VISIBLE
+        pad = 0.00
+        dummy_data = {
+            'index': [0, 1, 2, 3],
+            'RA': [-pad, area_size + pad, -pad, area_size + pad],
+            'DEC': [-pad, -pad, area_size + pad, area_size + pad],
+            'redshift': [0.5, 0.8, 0.3, 1.0],
+            'position_angle': [0.0, 45.0, 90.0, 135.0],  # Different orientations
+            'sersic_n': [1.0, 4.0, 2.0, 3.0],  # Mix of disk and bulge-like
+            'Re': [1.0, 0.5, 1.5, 0.8],  # Realistic sizes in arcsec
+            'axis_ratio': [0.7, 0.9, 0.6, 0.8],  # Some ellipticity
+            'bulge_fraction': [-999] * 4,  # Single Sersic profile
+            'bulge_Re': [-999] * 4,
+            'bulge_axis_ratio': [-999] * 4,
+            'bulge_n': [-999] * 4,
+            'disk_Re': [-999] * 4,
+            'disk_axis_ratio': [-999] * 4
+        }
+        # Realistic r-band magnitudes (bright enough to see)
+        for band in configs_dict['imsim']['bands']:
+            dummy_data[band] = [30.0, 30.0, 30.0, 30.0]  # very faint magnitudes to limit detection
+        if g_columns is not None:
+            dummy_data['gamma1'] = [0.0] * 4
+            dummy_data['gamma2'] = [0.0] * 4
+    
+        gals_info = [pd.DataFrame(dummy_data), None]
+        logger.info(f'Created {len(gals_info[0])} VISIBLE dummy galaxies spanning {area_size:.4f} x {area_size:.4f} deg')
+    
+    else:
+        gals_info = LoadCata.GalInfo(configs_dict['gal']['file'], configs_dict['imsim']['detection_band'], configs_dict['imsim']['bands'],
                         configs_dict['gal']['id_name'], configs_dict['gal']['detection_mag_name'], configs_dict['gal']['mag_name_list'],
                         configs_dict['gal']['RaDec_names'],
                         configs_dict['gal']['shape_names'],
                         configs_dict['gal']['z_name'],
                         mag_cut=configs_dict['gal']['mag_cut'], size_cut=configs_dict['gal']['size_cut'],
                         g_columns=g_columns)
-    ### for casual mode
-    if configs_dict['imsim']['casual_mag'] < configs_dict['gal']['mag_cut'][1]:
-        gals_info_careful, gals_info_casual = LoadCata.GalInfo_adjust4casual(gals_info,
-                    qbin_band=configs_dict['imsim']['casual_band'],
-                    qbin_mag=configs_dict['imsim']['casual_mag'],
-                    Nqbins=configs_dict['imsim']['casual_Nbins'],
-                    Frac_careful=configs_dict['imsim']['casual_FracSeedGal'],
-                    rng_seed=rng_seed)
-        gals_info = [gals_info_careful, gals_info_casual]
-        del gals_info_careful, gals_info_casual
-    else:
-        gals_info = [gals_info, None]
+        
+        ### for casual mode
+        if configs_dict['imsim']['casual_mag'] < configs_dict['gal']['mag_cut'][1]:
+            gals_info_careful, gals_info_casual = LoadCata.GalInfo_adjust4casual(gals_info,
+                                                                                 qbin_band=configs_dict['imsim']['casual_band'],
+                                                                                 qbin_mag=configs_dict['imsim']['casual_mag'],
+                                                                                 Nqbins=configs_dict['imsim']['casual_Nbins'],
+                                                                                 Frac_careful=configs_dict['imsim']['casual_FracSeedGal'],
+                                                                                 rng_seed=rng_seed)
+            gals_info = [gals_info_careful, gals_info_casual]
+            del gals_info_careful, gals_info_casual
+        else:
+            gals_info = [gals_info, None]
 
     ## load star info
     if configs_dict['star']['file']:
@@ -1383,6 +1432,9 @@ if __name__ == "__main__":
     parser.add_argument(
         '--version', action='version', version=__version__,
         help="The pipeline version.")
+    parser.add_argument(
+        '--stars_only', action="store_true",
+        help="If set, skip galaxy generation (stars only).")
 
     ## arg parser
     args = parser.parse_args()
@@ -1396,6 +1448,7 @@ if __name__ == "__main__":
     log_level = args.loglevel
     running_log = args.sep_running_log
     needed_tile = args.needed_tile
+    stars_only = args.stars_only
 
     ## logging
     numeric_level = getattr(logging, log_level.upper(), None)
@@ -1466,7 +1519,7 @@ if __name__ == "__main__":
 
     # 1: simulate images
     if ('1' in taskIDs) or ('all' in taskIDs):
-        run_task_1_simulate(configs_dict, Nmax_proc, rng_seed, g_cosmic, g_columns, run_tag, needed_tile)
+        run_task_1_simulate(configs_dict, Nmax_proc, rng_seed, g_cosmic, g_columns, run_tag, needed_tile, stars_only)
 
     # 2: swarp images
     if ('2' in taskIDs) or ('all' in taskIDs):
