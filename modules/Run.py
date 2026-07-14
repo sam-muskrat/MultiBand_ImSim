@@ -1165,6 +1165,8 @@ def run_task_6_2_shapes(configs_dict, tile_labels, Nmax_proc, rng_seed, running_
 
         ## I/O
         out_dir_tmp = os.path.join(configs_dict['work_dirs']['cata'], shapes_folder)
+        if PSF_size_error != 0.:
+            out_dir_tmp = os.path.join(out_dir_tmp, f'PSF_size_error_{PSF_size_error:+.4f}')
         pathlib.Path(out_dir_tmp).mkdir(parents=True, exist_ok=True)
 
         ## save one core for safety
