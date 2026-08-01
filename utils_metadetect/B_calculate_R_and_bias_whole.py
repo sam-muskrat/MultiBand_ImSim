@@ -17,12 +17,12 @@ from scipy.optimize import curve_fit
 ## ++++++++++++++ I/O and general setups
 
 ## Where to find the simulations
-main_dir = '/sdf/data/kipac/u/liss/ImSim/output/test_dev/LSST_r/'
+main_dir = '/Users/samcritchley/Coding/LSST/output'
 
 ## Shear inputs in simulations
-shear_tags = ['m283m283', 'm283p283', 'p283m283', 'p283p283']
-g1_input_list = [-0.0283, -0.0283, 0.0283, 0.0283]
-g2_input_list = [-0.0283, 0.0283, -0.0283, 0.0283]
+shear_tags = ['samtest31']
+g1_input_list = [0]
+g2_input_list = [0]
 
 ## Shear types used in metadetect
 shear_types = ['noshear', '1p', '1m', '2p', '2m']
@@ -47,7 +47,7 @@ cata = []
 for i_shear, shear_tag in enumerate(shear_tags):
     inpath_list = glob.glob(os.path.join(main_dir, 
                                          shear_tag, 
-                                         'catalogues/shapes_metadetect', 
+                                         'catalogues/shapes', 
                                          '*.feather'))
     print(f">>> Number of catalogues found in {shear_tag}: {len(inpath_list)}")
     for inpath in inpath_list:
@@ -89,6 +89,8 @@ for i_shear, shear_tag in enumerate(shear_tags):
         cata.append(cata_tmp)
         del cata_tmp
 cata = pd.concat(cata, ignore_index=True)
+
+cata = cata[cata[f'{fit_model}_T_ratio'] < 1.1]
 
 ## Calculat shear response and residual shear bias for the whole sample
 g1_input_all = []
@@ -172,17 +174,33 @@ print(">>>> Total number of points for fitting",
 def line_func(x, m, c):
     return (1+m) * x + c
 
-popt, pcov = curve_fit(line_func, 
-                       g1_input_all, 
-                       g1_measured_all)
-m1, c1 = popt
-m1_err, c1_err = np.sqrt(np.diag(pcov))
+# ------ MODIFIED BY SAM -------- #
 
-popt, pcov = curve_fit(line_func, 
-                       g2_input_all, 
-                       g2_measured_all)
-m2, c2 = popt
-m2_err, c2_err = np.sqrt(np.diag(pcov))
+# Handle g1
+if len(np.unique(g1_input_all)) > 1:
+    # Multiple input values - can fit slope
+    popt, pcov = curve_fit(line_func, g1_input_all, g1_measured_all)
+    m1, c1 = popt
+    m1_err, c1_err = np.sqrt(np.diag(pcov))
+else:
+    # All inputs the same - can only measure additive bias
+    print(f"Warning: All g1 inputs are {g1_input_all[0]}, cannot fit multiplicative bias")
+    m1, m1_err = np.nan, np.nan
+    c1 = np.mean(g1_measured_all)
+    c1_err = np.std(g1_measured_all) / np.sqrt(len(g1_measured_all))
+
+# Handle g2
+if len(np.unique(g2_input_all)) > 1:
+    # Multiple input values - can fit slope
+    popt, pcov = curve_fit(line_func, g2_input_all, g2_measured_all)
+    m2, c2 = popt
+    m2_err, c2_err = np.sqrt(np.diag(pcov))
+else:
+    # All inputs the same - can only measure additive bias
+    print(f"Warning: All g2 inputs are {g2_input_all[0]}, cannot fit multiplicative bias")
+    m2, m2_err = np.nan, np.nan
+    c2 = np.mean(g2_measured_all)
+    c2_err = np.std(g2_measured_all) / np.sqrt(len(g2_measured_all))
 
 print(f"m1 = {m1:.4f} pm {m1_err:.4f}, c1 = {c1:.4f} pm {c1_err:.4f}")
 print(f"m2 = {m2:.4f} pm {m2_err:.4f}, c2 = {c2:.4f} pm {c2_err:.4f}")

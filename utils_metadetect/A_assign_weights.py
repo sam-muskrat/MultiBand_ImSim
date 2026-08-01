@@ -8,6 +8,7 @@
 ###### follow the approach of https://ui.adsabs.harvard.edu/abs/2023OJAp....6E..17S/abstract
 
 import os
+import sys
 import glob
 
 import numpy as np 
@@ -15,11 +16,19 @@ import pandas as pd
 
 ## ++++++++++++++ I/O and general setups
 
+# get runtag from arg
+if len(sys.argv) < 2:
+    print("Error: No runTag provided!")
+    print("Usage: python A_assign_weights.py <runtag>")
+    sys.exit(1)
+
+RUNTAG = sys.argv[1]
+
 ## Where to find the simulations
-main_dir = '/sdf/data/kipac/u/liss/ImSim/output/test_dev/LSST_r/'
+main_dir = '/scratch/users/samjc/output'
 
 ## Shear inputs in simulations
-shear_tags = ['m283m283', 'm283p283', 'p283m283', 'p283p283']
+shear_tags = [RUNTAG]
 
 ## What is the fitting model used in metadetect
 fit_model = 'wmom'
@@ -29,7 +38,7 @@ snr_min = 12.5
 resolution_min = 1.2
 
 ## The intrinsic ellipticity dispersion
-sigma_SN = 0.07
+sigma_SN = 0.00 #for stars - 0.07 for galaxies
 
 ## ++++++++++++++ Workhorse
 
@@ -37,7 +46,7 @@ sigma_SN = 0.07
 for i_shear, shear_tag in enumerate(shear_tags):
     inpath_list = glob.glob(os.path.join(main_dir, 
                                          shear_tag, 
-                                         'catalogues/shapes_metadetect', 
+                                         'catalogues/shapes', 
                                          '*.feather'))
     print(f">>> Number of catalogues found in {shear_tag}: {len(inpath_list)}")
 
