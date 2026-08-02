@@ -16,5 +16,5 @@
 #                             7: create a combined catalogue
 #                             all: run all tasks in a sequence
 
-python ../modules/Run.py 6_2 --runTag samtest35 --threads 4 --rng_seed 940120 --cosmic_shear 0 0 -c ./example_simple_bandr.ini --sep_running_log --stars_only
+python ../modules/Run.py 6_2 --runTag samtest33 --threads 4 --rng_seed 940120 --cosmic_shear 0 0 -c ./example_simple_bandr.ini --sep_running_log --stars_only
 
