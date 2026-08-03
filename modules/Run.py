@@ -920,11 +920,8 @@ def run_task_6_1_psfmodel(configs_dict, tile_labels, Nmax_proc, running_log, nee
     logger.info(f'====== Task 6_1: PSF modelling === finished in {(time.time()-start_time)/3600.} h ======')
 
 
-<<<<<<< HEAD
+
 def run_task_6_2_shapes(configs_dict, tile_labels, Nmax_proc, rng_seed, running_log, needed_tile, PSF_size_error=0.0, PSF_beta_error=0.0):
-=======
-def run_task_6_2_shapes(configs_dict, tile_labels, Nmax_proc, rng_seed, running_log, needed_tile, PSF_size_error=0.0):
->>>>>>> sherlock-work
     """Task 6_2: measure galaxy shapes."""
     logger.info('====== Task 6_2: measure galaxy shapes === started ======')
     start_time = time.time()
